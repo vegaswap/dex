@@ -41,8 +41,8 @@ event StakeAdded:
 event Unstake:
     stakeAddress: address
     duration: uint256
-    interest: uint256
-    amount: uint256
+    stakeAmount: uint256
+    yieldAmount: uint256
 
 # duration in days
 struct Stake:
@@ -106,7 +106,7 @@ def stake(_stakeAmount: uint256, _duration: uint256):
     
     assert _duration == 30, "BoostPool: not staked long enough. 30 days required"
     # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
-    _yieldAmount: uint256 = _duration * self.stakes[msg.sender].stakeAmount * self.rewardPerDay/self.rewardQuote
+    _yieldAmount: uint256 = _duration * _stakeAmount * self.rewardPerDay/self.rewardQuote
 
     assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
     self.staker_addresses[self.stakeCount] = msg.sender
@@ -142,10 +142,9 @@ def unstake():
     # transfer back the stake
     assert ERC20(self.StakeToken).balanceOf(self) >= self.stakes[msg.sender].stakeAmount, "BoostPool: not enough tokens"
     # transfer interest in yield
-    #TODO check
     assert ERC20(self.YieldToken).transfer(msg.sender, self.stakes[msg.sender].yieldAmount), "BoostPool: sending yield failed"
 
-    # log Unstake(msg.sender, lockdays, interest, totalAmount)
+    log Unstake(msg.sender, lockdays, self.stakes[msg.sender].stakeAmount, self.stakes[msg.sender].yieldAmount)
 
     self.stakes[msg.sender].staked = False
 
