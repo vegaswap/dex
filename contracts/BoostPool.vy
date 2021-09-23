@@ -4,11 +4,11 @@
 # parameters
 # _duration: uint256
 # total amount to stake
+# max yield 5m tokens
 
-
-# TODO: token availability problem
+# TODO: token availability problem?
 # TODO: consider the case when not enough staking rewards are left?
-
+# TODO: decline of rewards
 
 from vyper.interfaces import ERC20
 
@@ -21,7 +21,10 @@ decimals: uint256
 duration: uint256
 startTime: uint256
 endTime: uint256
+#total number of yield promised
+yieldTotal: uint256
 maxStake: uint256
+maxYield: uint256
 totalAmountStaked: public(uint256)
 stakingActive: public(bool)
 rewardPerDay: public(uint256)
@@ -47,7 +50,9 @@ struct Stake:
     stakeAmount: uint256
     stakeTime: uint256
     duration: uint256
+    yieldAmount: uint256
     isAdded: bool
+    staked: bool
 
 
 # TOOD consider max array
@@ -61,15 +66,19 @@ def __init__(
     _stakeToken: address,
     _yieldToken: address,
     _duration: uint256,
-    _maxStake: uint256
+    # _maxStake: uint256,
+    _maxYield: uint256
     # _name: String[15],
 ):
     assert _stakeToken != ZERO_ADDRESS, "BoostPool: Vegatoken is zero address"
     assert _duration in [30,60,90]
 
+    self.owner = msg.sender    
+    self.maxYield = _maxYield
+    # self.maxStake = _maxStake
+
     self.StakeToken = _stakeToken
     self.YieldToken = _yieldToken
-    self.owner = msg.sender    
     decimals: uint256 = 18
     self.stakingActive = False
     self.rewardPerDay = 0
@@ -94,6 +103,12 @@ def stake(_stakeAmount: uint256, _duration: uint256):
 
     assert not self.stakes[msg.sender].isAdded, "BoostPool: can only stake once"
 
+    
+    assert _duration == 30, "BoostPool: not staked long enough. 30 days required"
+    # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
+    _yieldAmount: uint256 = _duration * self.stakes[msg.sender].stakeAmount * self.rewardPerDay/self.rewardQuote
+
+    assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
     self.staker_addresses[self.stakeCount] = msg.sender
     self.stakes[msg.sender] = Stake(
         {
@@ -101,7 +116,9 @@ def stake(_stakeAmount: uint256, _duration: uint256):
             stakeAmount: _stakeAmount,
             stakeTime: block.timestamp,
             duration: _duration,
+            yieldAmount: _yieldAmount,
             isAdded: True,
+            staked: True
         }
     )
     self.totalAmountStaked += _stakeAmount
@@ -116,23 +133,21 @@ def stake(_stakeAmount: uint256, _duration: uint256):
 def unstake():
     b: uint256 = ERC20(self.StakeToken).balanceOf(msg.sender)
     assert self.stakes[msg.sender].isAdded, "BoostPool: not a stakeholder"
+    assert self.stakes[msg.sender].staked, "BoostPool: unstaked already"
 
     lockduration: uint256 = block.timestamp - self.stakes[msg.sender].stakeTime
-    lockdays: uint256 = lockduration/(60*60*24)
-    assert lockdays >= 30, "BoostPool: not staked long enough. 30 days required"
-    assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
-    interest: uint256 = lockdays * self.rewardPerDay * self.stakes[msg.sender].stakeAmount/self.rewardQuote
+    lockdays: uint256 = lockduration/(60*60*24)    
+    assert lockdays >= self.stakes[msg.sender].duration, "BoostPool: not locked according to duration"
 
-    # transfer total and then interest
-    totalAmount: uint256 = self.stakes[msg.sender].stakeAmount + interest
-    assert ERC20(self.StakeToken).balanceOf(self) >= totalAmount, "BoostPool: not enough tokens"
-    # transferSuccess: bool = ERC20(self.StakeToken).transfer(msg.sender, totalAmount)
-    transferSuccess: bool = ERC20(self.StakeToken).transfer(msg.sender, totalAmount)
-    assert transferSuccess, "BoostPool: unstake failed"
+    # transfer back the stake
+    assert ERC20(self.StakeToken).balanceOf(self) >= self.stakes[msg.sender].stakeAmount, "BoostPool: not enough tokens"
+    # transfer interest in yield
+    #TODO check
+    assert ERC20(self.YieldToken).transfer(msg.sender, self.stakes[msg.sender].yieldAmount), "BoostPool: sending yield failed"
 
-    log Unstake(msg.sender, lockdays, interest, totalAmount)
+    # log Unstake(msg.sender, lockdays, interest, totalAmount)
 
-    self.stakes[msg.sender].stakeAmount = 0
+    self.stakes[msg.sender].staked = False
 
 @external
 def calcReward():

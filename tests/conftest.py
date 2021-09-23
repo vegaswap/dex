@@ -17,6 +17,12 @@ def token(VegaToken, accounts):
 
 
 @pytest.fixture(scope="module")
-def boostpool(token, accounts):
-    return BoostPool.deploy(token.address, token.address, 30, 10000, {"from": accounts[0]})
+def token2(VegaToken, accounts):
+    return VegaToken.deploy({"from": accounts[0]})
+
+
+@pytest.fixture(scope="module")
+def boostpool(token, token2, accounts):
+    maxy = 10000
+    return BoostPool.deploy(token.address, token2.address, 30, maxy, {"from": accounts[0]})
 

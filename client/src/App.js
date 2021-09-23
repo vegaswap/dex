@@ -92,6 +92,7 @@ class App extends Component {
 
         // Get the address of the most recent deployment from the deployment map
         let address
+        console.log("load " + contractName + " " + map)
         try {
             address = map[chain][contractName][0]
         } catch (e) {
