@@ -1,7 +1,6 @@
 
 project_structure:
     build: build
-    build: brownie-build
     contracts: contracts
     interfaces: interfaces
     reports: reports

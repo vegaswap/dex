@@ -2,12 +2,13 @@
 import brownie
 from brownie import chain
 
+
 def test_basic(accounts, token, boostpool):
     token.approve(boostpool, 1000, {"from": accounts[0]})
-    maxs = 10**9*10**18
+    maxs = 10 ** 9 * 10 ** 18
     assert token.balanceOf(accounts[0]) == maxs
 
-    boostpool.activateStaking( {"from": accounts[0]})
+    boostpool.activateStaking({"from": accounts[0]})
     boostpool.stake(1000, 30, {"from": accounts[0]})
 
     assert token.balanceOf(boostpool) == 1000
@@ -16,7 +17,7 @@ def test_basic(accounts, token, boostpool):
     s = boostpool.stakes(accounts[0])
     assert s[0] == accounts[0]
     assert s[1] == 1000
-    assert s[2] > chain.time()-10000
+    assert s[2] > chain.time() - 10000
     assert s[3] == 30
     assert s[4] == 0
     # assert s[5] == True
@@ -28,30 +29,30 @@ def test_basic(accounts, token, boostpool):
 
 
 def test_unstake(accounts, token, boostpool):
-    token.approve(boostpool, 1000, {"from": accounts[0]})    
+    token.approve(boostpool, 1000, {"from": accounts[0]})
     boostpool.depositOwner(1000, {"from": accounts[0]})
-    maxs = 10**9*10**18
-    boostpool.activateStaking( {"from": accounts[0]})
+    maxs = 10 ** 9 * 10 ** 18
+    boostpool.activateStaking({"from": accounts[0]})
 
-    token.approve(boostpool, 1000, {"from": accounts[0]})    
+    token.approve(boostpool, 1000, {"from": accounts[0]})
     boostpool.stake(1000, 30, {"from": accounts[0]})
 
-    chain.sleep(60*60*24*31)
-    
+    chain.sleep(60 * 60 * 24 * 31)
+
     boostpool.unstake({"from": accounts[0]})
-    maxs = 10**9*10**18
+    maxs = 10 ** 9 * 10 ** 18
     assert token.balanceOf(accounts[0]) == maxs - 2000
 
 
 def test_stakereward(accounts, token, boostpool):
-    boostpool.activateStaking( {"from": accounts[0]})
+    boostpool.activateStaking({"from": accounts[0]})
     rewday = 1
     boostpool.setReward(rewday, {"from": accounts[0]})
     boostpool.setRewardQuote(1, {"from": accounts[0]})
 
     assert boostpool.rewardPerDay() == 1
     assert boostpool.rewardQuote() == 1
-    
+
     token.approve(boostpool, 2000, {"from": accounts[0]})
     boostpool.depositOwner(2000, {"from": accounts[0]})
 
@@ -68,16 +69,16 @@ def test_stakereward(accounts, token, boostpool):
 
     assert tx.events["StakeAdded"][0]["stakeTime"] == t
 
-    s = boostpool.stakes(accounts[1]) 
-    assert s[0]== accounts[1]
+    s = boostpool.stakes(accounts[1])
+    assert s[0] == accounts[1]
     assert s[1] == stakeAmount
     assert s[2] - t < 10
-    assert s[3] == 30 
-    #yield
+    assert s[3] == 30
+    # yield
     assert s[4] == 30 * stakeAmount
 
     lockdays = 30
-    chain.sleep(60*60*24*lockdays)
+    chain.sleep(60 * 60 * 24 * lockdays)
     tx = boostpool.unstake({"from": accounts[1]})
     assert tx.events["Unstake"][0]["duration"] == 30
     assert tx.events["Unstake"][0]["stakeAmount"] == stakeAmount
@@ -85,15 +86,16 @@ def test_stakereward(accounts, token, boostpool):
 
     # assert tx.events["Unstake"][0]["amount"] == 1120
 
+
 def test_stakerewardQuote(accounts, token, boostpool):
-    boostpool.activateStaking( {"from": accounts[0]})
+    boostpool.activateStaking({"from": accounts[0]})
     rewday = 1
     boostpool.setReward(rewday, {"from": accounts[0]})
     boostpool.setRewardQuote(100, {"from": accounts[0]})
 
     assert boostpool.rewardPerDay() == 1
     assert boostpool.rewardQuote() == 100
-    
+
     token.approve(boostpool, 2000, {"from": accounts[0]})
     boostpool.depositOwner(2000, {"from": accounts[0]})
 
@@ -110,19 +112,19 @@ def test_stakerewardQuote(accounts, token, boostpool):
 
     assert tx.events["StakeAdded"][0]["stakeTime"] == t
 
-    s = boostpool.stakes(accounts[1]) 
-    assert s[0]== accounts[1]
+    s = boostpool.stakes(accounts[1])
+    assert s[0] == accounts[1]
     assert s[1] == stakeAmount
     assert s[2] - t < 10
-    assert s[3] == 30 
-    #yield
-    assert s[4] == 30 * stakeAmount/100
+    assert s[3] == 30
+    # yield
+    assert s[4] == 30 * stakeAmount / 100
 
     lockdays = 30
-    chain.sleep(60*60*24*lockdays)
+    chain.sleep(60 * 60 * 24 * lockdays)
     tx = boostpool.unstake({"from": accounts[1]})
     assert tx.events["Unstake"][0]["duration"] == 30
     assert tx.events["Unstake"][0]["stakeAmount"] == stakeAmount
-    assert tx.events["Unstake"][0]["yieldAmount"] == 30 * stakeAmount/100
+    assert tx.events["Unstake"][0]["yieldAmount"] == 30 * stakeAmount / 100
 
     # assert tx.events["Unstake"][0]["amount"] == 1120

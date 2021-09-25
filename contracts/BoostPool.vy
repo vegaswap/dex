@@ -14,10 +14,11 @@ from vyper.interfaces import ERC20
 
 # original deployer
 owner: address
-StakeToken: address
-YieldToken: address
+StakeToken: public(address)
+YieldToken: public(address)
 days: constant(uint256) = 86400
-decimals: uint256
+stakeDecimals: uint256
+yieldDecimals: uint256
 duration: uint256
 startTime: uint256
 endTime: uint256
@@ -66,8 +67,10 @@ def __init__(
     _stakeToken: address,
     _yieldToken: address,
     _duration: uint256,
-    # _maxStake: uint256,
-    _maxYield: uint256
+    _maxYield: uint256,
+    _maxStake: uint256,
+    _stakeDecimals: uint256,
+    _yieldDecimals: uint256
     # _name: String[15],
 ):
     assert _stakeToken != ZERO_ADDRESS, "BoostPool: Vegatoken is zero address"
@@ -79,7 +82,10 @@ def __init__(
 
     self.StakeToken = _stakeToken
     self.YieldToken = _yieldToken
-    decimals: uint256 = 18
+    self.maxStake = _maxStake
+    #TODO yield Decimals
+    self.stakeDecimals = _stakeDecimals
+    self.yieldDecimals = _yieldDecimals
     self.stakingActive = False
     self.rewardPerDay = 0
     self.rewardQuote = 1
@@ -94,6 +100,7 @@ def stake(_stakeAmount: uint256, _duration: uint256):
     assert self.stakingActive, "BoostPool: staking not active"
     assert block.timestamp < self.endTime, "BoostPool: ended"
     assert block.timestamp >= self.startTime, "BoostPool: not started"
+    assert _stakeAmount <= self.maxStake, "BoostPool: can't boost this amount"
 
     bal: uint256 = ERC20(self.StakeToken).balanceOf(msg.sender)
     unclaimed: uint256 = bal - self.totalAmountStaked

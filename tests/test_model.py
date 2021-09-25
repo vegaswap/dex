@@ -8,7 +8,7 @@
 #     rewday = 1
 #     boostpool.setReward(rewday, {"from": accounts[0]})
 #     boostpool.setRewardQuote(250, {"from": accounts[0]})
-    
+
 #     token.approve(boostpool, 2000, {"from": accounts[0]})
 #     boostpool.depositOwner(2000, {"from": accounts[0]})
 
@@ -21,7 +21,7 @@
 
 #     assert tx.events["StakeAdded"][0]["stakeTime"] == t
 
-#     s = boostpool.stakes(accounts[1]) 
+#     s = boostpool.stakes(accounts[1])
 #     assert s[0]== accounts[1]
 #     assert s[1] == 1000
 #     assert s[2] - t < 10

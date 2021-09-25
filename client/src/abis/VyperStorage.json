@@ -63,7 +63,7 @@
               "id": "uint256",
               "lineno": 3,
               "node_id": 7,
-              "src": "40:7:0"
+              "src": "40:7:1"
             }
           ],
           "ast_type": "Call",
@@ -78,13 +78,13 @@
             "id": "public",
             "lineno": 3,
             "node_id": 5,
-            "src": "33:6:0"
+            "src": "33:6:1"
           },
           "keyword": null,
           "keywords": [],
           "lineno": 3,
           "node_id": 4,
-          "src": "33:15:0"
+          "src": "33:15:1"
         },
         "ast_type": "AnnAssign",
         "col_offset": 0,
@@ -93,7 +93,7 @@
         "lineno": 3,
         "node_id": 1,
         "simple": 1,
-        "src": "20:28:0",
+        "src": "20:28:1",
         "target": {
           "ast_type": "Name",
           "col_offset": 0,
@@ -102,7 +102,7 @@
           "id": "stored_data",
           "lineno": 3,
           "node_id": 2,
-          "src": "20:11:0"
+          "src": "20:11:1"
         },
         "value": null
       },
@@ -117,7 +117,7 @@
           "end_lineno": 6,
           "lineno": 6,
           "node_id": 10,
-          "src": "60:3:0"
+          "src": "60:3:1"
         },
         "ast_type": "FunctionDef",
         "body": [
@@ -128,7 +128,7 @@
             "end_lineno": 7,
             "lineno": 7,
             "node_id": 11,
-            "src": "80:21:0",
+            "src": "80:21:1",
             "target": {
               "ast_type": "Attribute",
               "attr": "stored_data",
@@ -137,7 +137,7 @@
               "end_lineno": 7,
               "lineno": 7,
               "node_id": 12,
-              "src": "80:16:0",
+              "src": "80:16:1",
               "value": {
                 "ast_type": "Name",
                 "col_offset": 4,
@@ -146,7 +146,7 @@
                 "id": "self",
                 "lineno": 7,
                 "node_id": 13,
-                "src": "80:4:0"
+                "src": "80:4:1"
               }
             },
             "value": {
@@ -156,7 +156,7 @@
               "end_lineno": 7,
               "lineno": 7,
               "node_id": 16,
-              "src": "99:2:0",
+              "src": "99:2:1",
               "value": 10
             }
           }
@@ -171,7 +171,7 @@
             "id": "external",
             "lineno": 5,
             "node_id": 17,
-            "src": "51:8:0"
+            "src": "51:8:1"
           }
         ],
         "doc_string": null,
@@ -182,7 +182,7 @@
         "node_id": 9,
         "pos": null,
         "returns": null,
-        "src": "60:41:0"
+        "src": "60:41:1"
       },
       {
         "args": {
@@ -196,7 +196,7 @@
                 "id": "uint256",
                 "lineno": 10,
                 "node_id": 22,
-                "src": "125:7:0"
+                "src": "125:7:1"
               },
               "arg": "_x",
               "ast_type": "arg",
@@ -205,7 +205,7 @@
               "end_lineno": 10,
               "lineno": 10,
               "node_id": 21,
-              "src": "121:11:0"
+              "src": "121:11:1"
             }
           ],
           "ast_type": "arguments",
@@ -216,7 +216,7 @@
           "end_lineno": 10,
           "lineno": 10,
           "node_id": 20,
-          "src": "121:11:0"
+          "src": "121:11:1"
         },
         "ast_type": "FunctionDef",
         "body": [
@@ -227,7 +227,7 @@
             "end_lineno": 11,
             "lineno": 11,
             "node_id": 24,
-            "src": "139:21:0",
+            "src": "139:21:1",
             "target": {
               "ast_type": "Attribute",
               "attr": "stored_data",
@@ -236,7 +236,7 @@
               "end_lineno": 11,
               "lineno": 11,
               "node_id": 25,
-              "src": "139:16:0",
+              "src": "139:16:1",
               "value": {
                 "ast_type": "Name",
                 "col_offset": 4,
@@ -245,7 +245,7 @@
                 "id": "self",
                 "lineno": 11,
                 "node_id": 26,
-                "src": "139:4:0"
+                "src": "139:4:1"
               }
             },
             "value": {
@@ -256,7 +256,7 @@
               "id": "_x",
               "lineno": 11,
               "node_id": 29,
-              "src": "158:2:0"
+              "src": "158:2:1"
             }
           }
         ],
@@ -270,7 +270,7 @@
             "id": "external",
             "lineno": 9,
             "node_id": 31,
-            "src": "104:8:0"
+            "src": "104:8:1"
           }
         ],
         "doc_string": null,
@@ -281,7 +281,7 @@
         "node_id": 19,
         "pos": null,
         "returns": null,
-        "src": "113:47:0"
+        "src": "113:47:1"
       },
       {
         "args": {
@@ -294,7 +294,7 @@
           "end_lineno": 15,
           "lineno": 15,
           "node_id": 34,
-          "src": "178:3:0"
+          "src": "178:3:1"
         },
         "ast_type": "FunctionDef",
         "body": [
@@ -305,7 +305,7 @@
             "end_lineno": 16,
             "lineno": 16,
             "node_id": 35,
-            "src": "204:23:0",
+            "src": "204:23:1",
             "value": {
               "ast_type": "Attribute",
               "attr": "stored_data",
@@ -314,7 +314,7 @@
               "end_lineno": 16,
               "lineno": 16,
               "node_id": 36,
-              "src": "211:16:0",
+              "src": "211:16:1",
               "value": {
                 "ast_type": "Name",
                 "col_offset": 11,
@@ -323,7 +323,7 @@
                 "id": "self",
                 "lineno": 16,
                 "node_id": 37,
-                "src": "211:4:0"
+                "src": "211:4:1"
               }
             }
           }
@@ -338,7 +338,7 @@
             "id": "external",
             "lineno": 13,
             "node_id": 40,
-            "src": "163:8:0"
+            "src": "163:8:1"
           },
           {
             "ast_type": "Name",
@@ -348,7 +348,7 @@
             "id": "view",
             "lineno": 14,
             "node_id": 42,
-            "src": "173:4:0"
+            "src": "173:4:1"
           }
         ],
         "doc_string": null,
@@ -366,9 +366,9 @@
           "id": "uint256",
           "lineno": 15,
           "node_id": 44,
-          "src": "191:7:0"
+          "src": "191:7:1"
         },
-        "src": "178:49:0"
+        "src": "178:49:1"
       }
     ],
     "col_offset": 0,
@@ -378,7 +378,7 @@
     "lineno": 1,
     "name": "contracts/VyperStorage.vy",
     "node_id": 0,
-    "src": "0:227:0"
+    "src": "0:227:1"
   },
   "bytecode": "0x600a60005561007556600436101561000d57610061565b600035601c5260005134610067576360fe47b181141561002f57600435600055005b636d4ce63c8114156100475760005460005260206000f35b63b108b1db81141561005f5760005460005260206000f35b505b60006000fd5b600080fd5b61000961007503610009600039610009610075036000f3",
   "bytecodeSha1": "734d99127a1d4cbc6ec2fd0bb55418ed12d4c66d",
@@ -410,7 +410,7 @@
   },
   "dependencies": [],
   "deployedBytecode": "0x600436101561000d57610061565b600035601c5260005134610067576360fe47b181141561002f57600435600055005b636d4ce63c8114156100475760005460005260206000f35b63b108b1db81141561005f5760005460005260206000f35b505b60006000fd5b600080fd",
-  "deployedSourceMap": "-1:-1:0:-;;;;;:::-;;:::-;:::-;;;;;;;;;:::-;113:47;;;;;:::-;158:2;-1:-1;139:16;:21;113:47;:::-;178:49;;;;;:::-;211:16;204:23;;;;;;178:49::-;33:15;;;;;:::-;-1:-1;33:15;;;;;;:::-;-1:-1;:::-;;;;:::-;;;;",
+  "deployedSourceMap": "-1:-1:1:-;;;;;:::-;;:::-;:::-;;;;;;;;;:::-;113:47;;;;;:::-;158:2;-1:-1;139:16;:21;113:47;:::-;178:49;;;;;:::-;211:16;204:23;;;;;;178:49::-;33:15;;;;;:::-;-1:-1;33:15;;;;;;:::-;-1:-1;:::-;;;;:::-;;;;",
   "language": "Vyper",
   "natspec": {
     "methods": {}
