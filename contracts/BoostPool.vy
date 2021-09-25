@@ -19,6 +19,7 @@ YieldToken: public(address)
 days: constant(uint256) = 86400
 stakeDecimals: uint256
 yieldDecimals: uint256
+#in days
 duration: uint256
 startTime: uint256
 endTime: uint256
@@ -91,7 +92,7 @@ def __init__(
     self.rewardQuote = 1
     self.duration = _duration
     self.startTime = block.timestamp
-    self.endTime = self.startTime + self.duration
+    self.endTime = self.startTime + (self.duration * days)
 
 
 @external

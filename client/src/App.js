@@ -14,11 +14,17 @@ class App extends Component {
         totalSupply: 0,
         vgabalance: 0,
         ethbalance: 0,
+        vegaToken: null,
+        boostPool: null,
+        boostPoolAddress: null,
+        stakeToken: null,
+        yieldToken: null,
+        stake: null,
         boostAmount: 0,
         rewardDay: 0,
-        rewardDayInput: 0,
-        stakeToken: null,
-        yieldToken: null
+        rewardDayInput: 0,        
+        poolAllowance: 0,
+        totalAmountStaked: 0
     }
 
     componentDidMount = async () => {
@@ -51,25 +57,33 @@ class App extends Component {
     }
 
     loadInitialContracts = async () => {
+        const {web3} = this.state
+        const accounts = await web3.eth.getAccounts()
+
         // <=42 to exclude Kovan, <42 to include kovan
-        if (this.state.chainid < 42) {
-            // Wrong Network!
-            return
-        }
+        // if (this.state.chainid < 42) {
+        //     return
+        // }
         console.log(this.state.chainid)
         
         const vegaToken = await this.loadContract(this.state.chainid,"VegaToken")
         const boostPool = await this.loadContract(this.state.chainid,"BoostPool")
         
+        // for (let key in boostPool) {
+        //     console.log(key, boostPool[key]);
+        //   }
         const totalSupply = await vegaToken.methods.totalSupply().call()/10**18
         const vgabalance = await vegaToken.methods.balanceOf(this.state.accounts[0]).call()/10**18
-
-        const {web3} = this.state
+        
         const ethbalance = await web3.eth.getBalance(this.state.accounts[0])/10**18;
 
         const rewardDay = await boostPool.methods.rewardPerDay().call();
         const stakeToken = await boostPool.methods.StakeToken().call();
         const yieldToken = await boostPool.methods.YieldToken().call();
+        const totalAmountStaked = await boostPool.methods.totalAmountStaked().call();
+        const stake = await boostPool.methods.stakes(this.state.accounts[0]).call();        
+
+        const poolAllowance = await vegaToken.methods.allowance(accounts[0], boostPool._address).call()/10**18;
 
         // console.log("balance " + vgabalance + " ")
 
@@ -79,8 +93,13 @@ class App extends Component {
             totalSupply: totalSupply,
             rewardDay: rewardDay,
             boostPool: boostPool,
+            boostPoolAddress: boostPool._address,
+            poolAllowance: poolAllowance,
+            vegaToken: vegaToken,
             stakeToken: stakeToken,
-            yieldToken: yieldToken
+            yieldToken: yieldToken,
+            totalAmountStaked: totalAmountStaked,
+            stake: stake[1]
         })
     }
 
@@ -91,7 +110,6 @@ class App extends Component {
 
         // Get the address of the most recent deployment from the deployment map
         let address
-        console.log("load " + contractName + " " + deployMap)
         
         try {
             // address = map[chain][contractName][0]
@@ -111,9 +129,10 @@ class App extends Component {
             console.log(`Failed to load contract ${contractName} ${chain} ${address}`)
             return undefined
         }
-        console.log(contractArtifact.abi)
 
-        return new web3.eth.Contract(contractArtifact.abi, address)
+        let ctr = new web3.eth.Contract(contractArtifact.abi, address)
+        console.log(">>> loaded " + address + " " + contractName + " " + ctr)
+        return ctr;
     }
 
 
@@ -135,12 +154,77 @@ class App extends Component {
             })       
     }
 
-   
+    approve = async (e) => {
+        const {accounts, boostPool, vegaToken} = this.state
+        console.log("set reward")
+        e.preventDefault()
+        // const value = parseInt(rewardDayInput);
+        // let amount = 10**6*10**18;
+        let account = accounts[0];
+        let bal = await vegaToken.methods.balanceOf(account).call();
+        console.log(bal);
+        let amount = bal;
+        // let amount = 100;
+        await vegaToken.methods.approve(boostPool._address, amount).send({from: account})        
+        //  }).on('transactionHash', (transactionHash) => {
+        //     console.log(`Successfully submitted contract creation. Transaction hash: ${transactionHash}`); 
+        //  }).on('receipt', (receipt) => {
+        //     console.log(`Receipt after mining with contract address: ${receipt.contractAddress}`); 
+        //     console.log(`Receipt after mining with events: ${JSON.stringify(receipt.events, null, 2)}`); 
+        //  }).on('confirmation', (confirmationNumber, receipt) => { 
+        //      console.log(`Confirmation no. ${confirmationNumber} and receipt for contract deployment: `, receipt); 
+        //  }).then((instance) => {
+        //      console.log(instance);
+        //      let address = instance.options.address;
+        //  }).catch((error) => {
+        //      console.log(error);
+        //  });
+            .on('receipt', async () => {
+                this.setState({
+                    // poolAllowance: await vegaToken.methods.allowance(account, boostPool._address).call()
+                })
+            }) 
+            .then((instance) => {
+                console.log(">! " + instance.status);
+                // let address = instance.options.address;
+            }).catch((error) => {
+                console.log("error " + error);
+            });
+        //      console.log(error);
+        //  });      
+    }
+
+    boost = async (e) => {
+        const {accounts, boostPool, vegaToken} = this.state
+        console.log("boost ")
+        e.preventDefault()
+        // // const value = parseInt(rewardDayInput);
+        // // let amount = 10**6*10**18;
+        // let account = accounts[0];
+        // let bal = vegaToken.methods.balanceOf(account).call();
+        // let amount = bal.value();
+        // // let amount = 100;
+        let account = accounts[0];
+        let duration = 30;
+        let amount = 100;
+        await boostPool.methods.stake(amount, duration).send({from: account})
+            .on('receipt', async (e) => {
+                console.log("staked..")
+                console.log(e.transactionHash)
+                // this.setState({
+                //     poolAllowance: await boostPool.methods.allowance(account, boostPool._address).call()
+                // })
+            })       
+    }
+
+
 
     render() {
         const {
             web3, accounts, chainid,
-            totalSupply, vgabalance, ethbalance, boostAmount, rewardDay, rewardDayInput, stakeToken, yieldToken
+            totalSupply, vgabalance, ethbalance, stake,
+            vegaToken, boostPool, boostPoolAddress, stakeToken, yieldToken,
+            boostAmount, rewardDay, rewardDayInput, poolAllowance, totalAmountStaked
         } = this.state
 
         if (!web3) {
@@ -166,13 +250,33 @@ class App extends Component {
 
             <div>Total supply: {totalSupply}</div>
             <div>account: {accounts[0]}</div>
+            {/* <div>boost pool address: {boostPool._address}</div> */}
+            <div>boost pool address: {boostPoolAddress}</div>
             <div>VGA balance: {vgabalance}</div>
             <div>ETH balance: {ethbalance}</div>
+            <div>staked: {stake}</div>
             <div>rewardDay: {rewardDay}</div>
             <div>Stake Token: {stakeToken}</div>
             <div>Yield Token: {yieldToken}</div>
+            <div>poolAllowance:  {poolAllowance}</div>
+            <div>totalAmountStaked:  {totalAmountStaked}</div>
             
             <br/>
+            <form onSubmit={(e) => this.approve(e)}>
+                <div>
+                    <button type="submit" disabled={!isAccountsUnlocked}>Approve</button>
+                </div>
+            </form>
+            <br/>
+
+            <form onSubmit={(e) => this.approve(e)}>
+                <div>
+                    <button type="submit" disabled={!isAccountsUnlocked}>Boost</button>
+                </div>
+            </form>
+            <br/>
+
+
             <form onSubmit={(e) => this.changeVyper(e)}>
                 <div>
                     <label>Stake amount</label>
