@@ -23,7 +23,9 @@ def main():
             {"from": accounts[0]},
         )
         print("deployed pool", bpool)
-        # boostpool.activateStaking({"from": accounts[0]})
+        bpool.activateStaking({"from": accounts[0]})
+        bpool.setReward(15,{"from": accounts[0]})
+
         # boostpool.stake(1000, 30, {"from": accounts[0]})
     elif net == "bsctest":
         print("net ", net)
@@ -51,6 +53,7 @@ def main():
         # )
         # print("bpool ", bpool)
         bpool = "0x6f46A988282FE5800267e756cB148F2C7e281bC8"
+        print(netw)
 
 
     # elif network.show_active() == 'kovan':

@@ -4,6 +4,7 @@ import {getWeb3} from "./getWeb3"
 import deployMap from "./abis/deployMap.json"
 import {getEthereum} from "./getEthereum"
 
+
 class App extends Component {
 
     state = {
@@ -20,6 +21,7 @@ class App extends Component {
         stakeToken: null,
         yieldToken: null,
         stake: null,
+        yieldTotal: 0,
         boostAmount: 0,
         rewardDay: 0,
         rewardDayInput: 0,        
@@ -81,6 +83,7 @@ class App extends Component {
         const stakeToken = await boostPool.methods.StakeToken().call();
         const yieldToken = await boostPool.methods.YieldToken().call();
         const totalAmountStaked = await boostPool.methods.totalAmountStaked().call();
+        const yieldTotal = await boostPool.methods.yieldTotal().call()/10**18;
         const stake = await boostPool.methods.stakes(this.state.accounts[0]).call();        
 
         const poolAllowance = await vegaToken.methods.allowance(accounts[0], boostPool._address).call()/10**18;
@@ -99,7 +102,8 @@ class App extends Component {
             stakeToken: stakeToken,
             yieldToken: yieldToken,
             totalAmountStaked: totalAmountStaked,
-            stake: stake[1]
+            stake: stake[1],
+            yieldTotal: yieldTotal
         })
     }
 
@@ -112,8 +116,7 @@ class App extends Component {
         let address
         
         try {
-            // address = map[chain][contractName][0]
-            // address = deployMap[contractName]
+            
             address = deployMap[chain][contractName]
         } catch (e) {
             console.log(`Couldn't find any deployed contract "${contractName}" on the chain "${chain}".`)
@@ -167,18 +170,8 @@ class App extends Component {
         // let amount = 100;
         await vegaToken.methods.approve(boostPool._address, amount).send({from: account})        
         //  }).on('transactionHash', (transactionHash) => {
-        //     console.log(`Successfully submitted contract creation. Transaction hash: ${transactionHash}`); 
         //  }).on('receipt', (receipt) => {
-        //     console.log(`Receipt after mining with contract address: ${receipt.contractAddress}`); 
-        //     console.log(`Receipt after mining with events: ${JSON.stringify(receipt.events, null, 2)}`); 
-        //  }).on('confirmation', (confirmationNumber, receipt) => { 
-        //      console.log(`Confirmation no. ${confirmationNumber} and receipt for contract deployment: `, receipt); 
-        //  }).then((instance) => {
-        //      console.log(instance);
-        //      let address = instance.options.address;
-        //  }).catch((error) => {
-        //      console.log(error);
-        //  });
+        //  }).on('confirmation', (confirmationNumber, receipt) => {         
             .on('receipt', async () => {
                 this.setState({
                     // poolAllowance: await vegaToken.methods.allowance(account, boostPool._address).call()
@@ -190,23 +183,16 @@ class App extends Component {
             }).catch((error) => {
                 console.log("error " + error);
             });
-        //      console.log(error);
-        //  });      
     }
 
     boost = async (e) => {
-        const {accounts, boostPool, vegaToken} = this.state
-        console.log("boost ")
+        const {accounts, boostPool, boostAmount} = this.state
+        console.log("boost " + boostAmount)
         e.preventDefault()
-        // // const value = parseInt(rewardDayInput);
-        // // let amount = 10**6*10**18;
-        // let account = accounts[0];
-        // let bal = vegaToken.methods.balanceOf(account).call();
-        // let amount = bal.value();
-        // // let amount = 100;
+        
         let account = accounts[0];
         let duration = 30;
-        let amount = 100;
+        let amount = boostAmount;
         await boostPool.methods.stake(amount, duration).send({from: account})
             .on('receipt', async (e) => {
                 console.log("staked..")
@@ -214,7 +200,10 @@ class App extends Component {
                 // this.setState({
                 //     poolAllowance: await boostPool.methods.allowance(account, boostPool._address).call()
                 // })
-            })       
+            })
+            .catch((error) => {
+                console.log("error " + error);
+            });     
     }
 
 
@@ -222,7 +211,7 @@ class App extends Component {
     render() {
         const {
             web3, accounts, chainid,
-            totalSupply, vgabalance, ethbalance, stake,
+            totalSupply, vgabalance, ethbalance, stake, yieldTotal,
             vegaToken, boostPool, boostPoolAddress, stakeToken, yieldToken,
             boostAmount, rewardDay, rewardDayInput, poolAllowance, totalAmountStaked
         } = this.state
@@ -232,7 +221,8 @@ class App extends Component {
         }
 
         // <=42 to exclude Kovan, <42 to include Kovan
-        if (isNaN(chainid) || chainid < 42) {
+        // if (isNaN(chainid) || chainid < 42) {
+        if (isNaN(chainid)) {
             return <div>Wrong Network! Switch to your local RPC "Localhost: 8545" in your Web3 provider (e.g. Metamask)</div>
         }
 
@@ -252,6 +242,7 @@ class App extends Component {
             <div>account: {accounts[0]}</div>
             {/* <div>boost pool address: {boostPool._address}</div> */}
             <div>boost pool address: {boostPoolAddress}</div>
+            <div>yieldTotal: {yieldTotal}</div>
             <div>VGA balance: {vgabalance}</div>
             <div>ETH balance: {ethbalance}</div>
             <div>staked: {stake}</div>
@@ -269,15 +260,7 @@ class App extends Component {
             </form>
             <br/>
 
-            <form onSubmit={(e) => this.approve(e)}>
-                <div>
-                    <button type="submit" disabled={!isAccountsUnlocked}>Boost</button>
-                </div>
-            </form>
-            <br/>
-
-
-            <form onSubmit={(e) => this.changeVyper(e)}>
+            <form onSubmit={(e) => this.boost(e)}>
                 <div>
                     <label>Stake amount</label>
                     <br/>
@@ -293,7 +276,7 @@ class App extends Component {
             </form>
             <br/>
 
-            <form onSubmit={(e) => this.setReward(e)}>
+            {/* <form onSubmit={(e) => this.setReward(e)}>
                 <div>
                     <label>Change reward to: </label>
                     <br/>
@@ -306,7 +289,7 @@ class App extends Component {
                     <br/>
                     <button type="submit" disabled={!isAccountsUnlocked}>Submit</button>
                 </div>
-            </form>
+            </form> */}
 
             
         </div>)

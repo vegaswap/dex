@@ -1,14 +1,10 @@
 # @version ^0.2.15
 
 # boost pool
-# parameters
-# _duration: uint256
-# total amount to stake
-# max yield 5m tokens
 
-# TODO: token availability problem?
-# TODO: consider the case when not enough staking rewards are left?
+# TODO: token availability?
 # TODO: decline of rewards
+# TODO: define window for staking and after window can't stake
 
 from vyper.interfaces import ERC20
 
@@ -24,7 +20,7 @@ duration: uint256
 startTime: uint256
 endTime: uint256
 #total number of yield promised
-yieldTotal: uint256
+yieldTotal: public(uint256)
 maxStake: uint256
 maxYield: uint256
 totalAmountStaked: public(uint256)
@@ -51,7 +47,7 @@ struct Stake:
     stakeAddress: address
     stakeAmount: uint256
     stakeTime: uint256
-    duration: uint256
+    # duration: uint256
     yieldAmount: uint256
     isAdded: bool
     staked: bool
@@ -67,54 +63,51 @@ stakes: public(HashMap[address, Stake])
 def __init__(
     _stakeToken: address,
     _yieldToken: address,
-    _duration: uint256,
-    _maxYield: uint256,
+    _duration: uint256,    
     _maxStake: uint256,
+    _yieldTotal: uint256,
     _stakeDecimals: uint256,
     _yieldDecimals: uint256
     # _name: String[15],
 ):
     assert _stakeToken != ZERO_ADDRESS, "BoostPool: Vegatoken is zero address"
+    #TODO check
     assert _duration in [30,60,90]
 
     self.owner = msg.sender    
-    self.maxYield = _maxYield
-    # self.maxStake = _maxStake
-
+    self.maxStake = _maxStake
+    self.yieldTotal = _yieldTotal
     self.StakeToken = _stakeToken
     self.YieldToken = _yieldToken
-    self.maxStake = _maxStake
-    #TODO yield Decimals
     self.stakeDecimals = _stakeDecimals
     self.yieldDecimals = _yieldDecimals
     self.stakingActive = False
     self.rewardPerDay = 0
     self.rewardQuote = 1
     self.duration = _duration
+    #TODO start
     self.startTime = block.timestamp
     self.endTime = self.startTime + (self.duration * days)
 
 
 @external
-def stake(_stakeAmount: uint256, _duration: uint256):
-    #TODO need to check again pool, need always a reserve to pay out    
+# def stake(_stakeAmount: uint256, _duration: uint256):
+def stake(_stakeAmount: uint256):
     assert self.stakingActive, "BoostPool: staking not active"
     assert block.timestamp < self.endTime, "BoostPool: ended"
     assert block.timestamp >= self.startTime, "BoostPool: not started"
-    assert _stakeAmount <= self.maxStake, "BoostPool: can't boost this amount"
+    assert _stakeAmount <= self.maxStake, "BoostPool: max stake reached"
 
     bal: uint256 = ERC20(self.StakeToken).balanceOf(msg.sender)
     unclaimed: uint256 = bal - self.totalAmountStaked
     assert unclaimed >= _stakeAmount, "BoostPool: need the tokens to stake"
-    assert _duration >= 30, "BoostPool: need to stake at least 30 days"
+    # assert _duration >= 30, "BoostPool: need to stake at least 30 days"
     # assert amount >= self.minstake
 
     assert not self.stakes[msg.sender].isAdded, "BoostPool: can only stake once"
-
     
-    assert _duration == 30, "BoostPool: not staked long enough. 30 days required"
     # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
-    _yieldAmount: uint256 = _duration * _stakeAmount * self.rewardPerDay/self.rewardQuote
+    _yieldAmount: uint256 = self.duration * _stakeAmount * self.rewardPerDay/self.rewardQuote
 
     assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
     self.staker_addresses[self.stakeCount] = msg.sender
@@ -123,7 +116,7 @@ def stake(_stakeAmount: uint256, _duration: uint256):
             stakeAddress: msg.sender,
             stakeAmount: _stakeAmount,
             stakeTime: block.timestamp,
-            duration: _duration,
+            # duration: _duration,
             yieldAmount: _yieldAmount,
             isAdded: True,
             staked: True
@@ -145,7 +138,8 @@ def unstake():
 
     lockduration: uint256 = block.timestamp - self.stakes[msg.sender].stakeTime
     lockdays: uint256 = lockduration/(60*60*24)    
-    assert lockdays >= self.stakes[msg.sender].duration, "BoostPool: not locked according to duration"
+    assert lockdays >= self.duration, "BoostPool: not locked according to duration"    
+    # self.stakes[msg.sender].duration, "BoostPool: not locked according to duration"
 
     # transfer back the stake
     assert ERC20(self.StakeToken).balanceOf(self) >= self.stakes[msg.sender].stakeAmount, "BoostPool: not enough tokens"
