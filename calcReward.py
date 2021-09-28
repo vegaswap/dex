@@ -20,7 +20,7 @@ def calc_apy(ROI, days):
     return  -1+(1+ ROI)**(360/days)
 
 def back_calc():
-    ROI = 0.2
+    ROI = 0.1
 
     apy = calc_apy(ROI, 30)
     maxStake = 1000
@@ -33,15 +33,15 @@ def back_calc():
     print("reward VGA ", reward)
     print("reward VGA per USD ", reward/stake)
 
-stakeAmount = 1000
-reward = rewardVGA * stakeAmount
-rewardUSD = reward * priceVGA
-ROI = rewardUSD/stakeAmount
-print(ROI)
+# stakeAmount = 1000
+# reward = rewardVGA * stakeAmount
+# rewardUSD = reward * priceVGA
+# ROI = rewardUSD/stakeAmount
+# print(ROI)
+
+back_calc()
 
 # print("reward/day per $ ", (reward/30)/stake)
-
-
 # reward = rewardDay * lockDuration * stakeAmount
 # reward = rewardTotal * stakeAmount
 # rewardUSD = reward * priceVGA

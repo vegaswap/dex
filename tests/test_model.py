@@ -1,13 +1,13 @@
 # #!/usr/bin/python3
-# import brownie
-# from brownie import chain
+import brownie
+from brownie import chain
 
 
 # def test_stakereward(accounts, token, boostpool):
 #     boostpool.activateStaking( {"from": accounts[0]})
 #     rewday = 1
-#     boostpool.setReward(rewday, {"from": accounts[0]})
-#     boostpool.setRewardQuote(250, {"from": accounts[0]})
+#     # boostpool.setReward(rewday, {"from": accounts[0]})
+#     # boostpool.setRewardQuote(250, {"from": accounts[0]})
 
 #     token.approve(boostpool, 2000, {"from": accounts[0]})
 #     boostpool.depositOwner(2000, {"from": accounts[0]})

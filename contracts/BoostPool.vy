@@ -25,7 +25,7 @@ maxStake: uint256
 maxYield: uint256
 totalAmountStaked: public(uint256)
 stakingActive: public(bool)
-rewardPerDay: public(uint256)
+reward: public(uint256)
 rewardQuote: public(uint256)
 
 event Deposit:
@@ -38,7 +38,7 @@ event StakeAdded:
 
 event Unstake:
     stakeAddress: address
-    duration: uint256
+    lockDays: uint256
     stakeAmount: uint256
     yieldAmount: uint256
 
@@ -63,11 +63,12 @@ stakes: public(HashMap[address, Stake])
 def __init__(
     _stakeToken: address,
     _yieldToken: address,
-    _duration: uint256,    
-    # _maxStake: uint256,
+    _duration: uint256,
+    _reward: uint256,   
     _maxYield: uint256,
     _stakeDecimals: uint256,
-    _yieldDecimals: uint256
+    _yieldDecimals: uint256,
+    _maxPerStake: uint256,
     # _name: String[15],
 ):
     assert _stakeToken != ZERO_ADDRESS, "BoostPool: Vegatoken is zero address"
@@ -76,16 +77,17 @@ def __init__(
 
     self.owner = msg.sender    
     # self.maxStake = _maxStake
-    self.maxYield = _maxYield
     self.StakeToken = _stakeToken
     self.YieldToken = _yieldToken
+    self.duration = _duration
+    self.reward = _reward
+    self.rewardQuote = 1
+    self.maxYield = _maxYield
     self.stakeDecimals = _stakeDecimals
     self.yieldDecimals = _yieldDecimals
     self.stakingActive = False
     self.yieldTotal = 0
-    self.rewardPerDay = 0
-    self.rewardQuote = 1
-    self.duration = _duration
+    # self.reward = 0
     #TODO start
     self.startTime = block.timestamp
     self.endTime = self.startTime + (self.duration * days)
@@ -93,7 +95,7 @@ def __init__(
 
 @external
 def stake(_stakeAmount: uint256):
-    assert self.stakingActive, "BoostPool: staking not active"
+    assert self.stakingActive, "BoostPool: staking not active"    
     assert block.timestamp < self.endTime, "BoostPool: ended"
     assert block.timestamp >= self.startTime, "BoostPool: not started"
     # assert _stakeAmount <= self.maxStake, "BoostPool: max stake"
@@ -107,7 +109,7 @@ def stake(_stakeAmount: uint256):
     assert not self.stakes[msg.sender].isAdded, "BoostPool: can only stake once"
     
     # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
-    _yieldAmount: uint256 = self.duration * _stakeAmount * self.rewardPerDay/self.rewardQuote
+    _yieldAmount: uint256 = _stakeAmount * self.reward/self.rewardQuote
 
     assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
     self.staker_addresses[self.stakeCount] = msg.sender
@@ -138,7 +140,7 @@ def unstake():
 
     lockduration: uint256 = block.timestamp - self.stakes[msg.sender].stakeTime
     lockdays: uint256 = lockduration/(60*60*24)    
-    assert lockdays >= self.duration, "BoostPool: not locked according to duration"    
+    assert lockdays >= self.duration, "BoostPool: not locked for duration"    
     # self.stakes[msg.sender].duration, "BoostPool: not locked according to duration"
 
     # transfer back the stake
@@ -150,20 +152,16 @@ def unstake():
 
     self.stakes[msg.sender].staked = False
 
-@external
-def calcReward():
-    #calc APY
-    pass
 
-@external
-def setReward(_rewardPerDay: uint256):
-    assert msg.sender == self.owner, "BoostPool: not the owner"
-    self.rewardPerDay = _rewardPerDay
+# @external
+# def setReward(_rewardPerDay: uint256):
+#     assert msg.sender == self.owner, "BoostPool: not the owner"
+#     self.rewardPerDay = _rewardPerDay
     
-@external
-def setRewardQuote(_rewardQuote: uint256):
-    assert msg.sender == self.owner, "BoostPool: not the owner"
-    self.rewardQuote = _rewardQuote
+# @external
+# def setRewardQuote(_rewardQuote: uint256):
+#     assert msg.sender == self.owner, "BoostPool: not the owner"
+#     self.rewardQuote = _rewardQuote
         
 @external
 def depositOwner(amount: uint256):
