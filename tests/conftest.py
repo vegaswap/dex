@@ -29,7 +29,7 @@ def boostpool(token, token2, accounts):
         token2.address,
         30,
         maxy,
-        1000 * 10 ** 18,
+        # 1000 * 10 ** 18,
         18,
         18,
         {"from": accounts[0]},

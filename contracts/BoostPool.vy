@@ -4,7 +4,7 @@
 
 # TODO: token availability?
 # TODO: decline of rewards
-# TODO: define window for staking and after window can't stake
+# TODO: define time window for staking and after window can't stake
 
 from vyper.interfaces import ERC20
 
@@ -64,8 +64,8 @@ def __init__(
     _stakeToken: address,
     _yieldToken: address,
     _duration: uint256,    
-    _maxStake: uint256,
-    _yieldTotal: uint256,
+    # _maxStake: uint256,
+    _maxYield: uint256,
     _stakeDecimals: uint256,
     _yieldDecimals: uint256
     # _name: String[15],
@@ -75,13 +75,14 @@ def __init__(
     assert _duration in [30,60,90]
 
     self.owner = msg.sender    
-    self.maxStake = _maxStake
-    self.yieldTotal = _yieldTotal
+    # self.maxStake = _maxStake
+    self.maxYield = _maxYield
     self.StakeToken = _stakeToken
     self.YieldToken = _yieldToken
     self.stakeDecimals = _stakeDecimals
     self.yieldDecimals = _yieldDecimals
     self.stakingActive = False
+    self.yieldTotal = 0
     self.rewardPerDay = 0
     self.rewardQuote = 1
     self.duration = _duration
@@ -91,12 +92,11 @@ def __init__(
 
 
 @external
-# def stake(_stakeAmount: uint256, _duration: uint256):
 def stake(_stakeAmount: uint256):
     assert self.stakingActive, "BoostPool: staking not active"
     assert block.timestamp < self.endTime, "BoostPool: ended"
     assert block.timestamp >= self.startTime, "BoostPool: not started"
-    assert _stakeAmount <= self.maxStake, "BoostPool: max stake reached"
+    # assert _stakeAmount <= self.maxStake, "BoostPool: max stake"
 
     bal: uint256 = ERC20(self.StakeToken).balanceOf(msg.sender)
     unclaimed: uint256 = bal - self.totalAmountStaked
