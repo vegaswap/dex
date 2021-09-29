@@ -16,15 +16,16 @@ def main():
             token.address,
             token.address,
             30,
+            1,
             maxy,
+            18,
+            18,
             1000 * 10 ** 18,
-            18,
-            18,
             {"from": accounts[0]},
         )
         print("deployed pool", bpool)
         bpool.activateStaking({"from": accounts[0]})
-        bpool.setReward(15,{"from": accounts[0]})
+        # bpool.setReward(15,{"from": accounts[0]})
 
         # boostpool.stake(1000, 30, {"from": accounts[0]})
     elif net == "bsctest":

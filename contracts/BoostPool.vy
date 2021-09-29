@@ -2,6 +2,9 @@
 
 # boost pool
 # functions like airdrop
+# fixed rate at the beginning
+
+# 30 days, 60 days
 
 # TODO: token availability?
 # TODO: dynamic formula
@@ -36,6 +39,8 @@ maxYield: uint256
 totalAmountStaked: public(uint256)
 stakingActive: public(bool)
 reward: public(uint256)
+# rewardSteps: public(uint256[5])
+# stakeSteps: public(uint256[5])
 rewardQuote: public(uint256)
 
 event Deposit:
@@ -75,6 +80,8 @@ def __init__(
     _yieldToken: address,
     _duration: uint256,
     _reward: uint256,   
+    # _rewardSteps: uint256,
+    # _stakeSteps: uint256,
     _maxYield: uint256,
     _stakeDecimals: uint256,
     _yieldDecimals: uint256,
