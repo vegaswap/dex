@@ -1,10 +1,20 @@
 # @version ^0.2.15
 
 # boost pool
+# functions like airdrop
 
 # TODO: token availability?
-# TODO: decline of rewards
-# TODO: define time window for staking and after window can't stake
+# TODO: dynamic formula
+# TODO: define time window for staking
+# TODO: dynamic price
+# 
+#     t0          t1     t2     t3
+#     announce    start  final  unstake event
+
+# todo: how to avoid sell after unstake event
+# rolling time window?
+# consider extra lock
+# max stake is like logartihmic interest rate
 
 from vyper.interfaces import ERC20
 
@@ -21,7 +31,7 @@ startTime: uint256
 endTime: uint256
 #total number of yield promised
 yieldTotal: public(uint256)
-maxStake: uint256
+maxPerStake: public(uint256)
 maxYield: uint256
 totalAmountStaked: public(uint256)
 stakingActive: public(bool)
@@ -76,13 +86,13 @@ def __init__(
     assert _duration in [30,60,90]
 
     self.owner = msg.sender    
-    # self.maxStake = _maxStake
     self.StakeToken = _stakeToken
     self.YieldToken = _yieldToken
     self.duration = _duration
     self.reward = _reward
     self.rewardQuote = 1
     self.maxYield = _maxYield
+    self.maxPerStake = _maxPerStake
     self.stakeDecimals = _stakeDecimals
     self.yieldDecimals = _yieldDecimals
     self.stakingActive = False
@@ -98,7 +108,7 @@ def stake(_stakeAmount: uint256):
     assert self.stakingActive, "BoostPool: staking not active"    
     assert block.timestamp < self.endTime, "BoostPool: ended"
     assert block.timestamp >= self.startTime, "BoostPool: not started"
-    # assert _stakeAmount <= self.maxStake, "BoostPool: max stake"
+    assert _stakeAmount <= self.maxPerStake, "BoostPool: more than maximum stake"
 
     bal: uint256 = ERC20(self.StakeToken).balanceOf(msg.sender)
     unclaimed: uint256 = bal - self.totalAmountStaked
@@ -143,15 +153,16 @@ def unstake():
     assert lockdays >= self.duration, "BoostPool: not locked for duration"    
     # self.stakes[msg.sender].duration, "BoostPool: not locked according to duration"
 
-    # transfer back the stake
-    assert ERC20(self.StakeToken).balanceOf(self) >= self.stakes[msg.sender].stakeAmount, "BoostPool: not enough tokens"
-    # transfer interest in yield
+    # transfer stake
+    assert ERC20(self.StakeToken).transfer(msg.sender, self.stakes[msg.sender].stakeAmount), "BoostPool: sending stake failed"
+    # transfer yield
     assert ERC20(self.YieldToken).transfer(msg.sender, self.stakes[msg.sender].yieldAmount), "BoostPool: sending yield failed"
-
-    log Unstake(msg.sender, lockdays, self.stakes[msg.sender].stakeAmount, self.stakes[msg.sender].yieldAmount)
 
     self.stakes[msg.sender].staked = False
 
+    self.totalAmountStaked -= self.stakes[msg.sender].stakeAmount
+
+    log Unstake(msg.sender, lockdays, self.stakes[msg.sender].stakeAmount, self.stakes[msg.sender].yieldAmount)
 
 # @external
 # def setReward(_rewardPerDay: uint256):

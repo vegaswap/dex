@@ -5,12 +5,13 @@ from brownie import chain
 
 def test_basic(accounts, token, boostpool):
     token.approve(boostpool, 1000, {"from": accounts[0]})
-    maxs = 10 ** 9 * 10 ** 18
+    maxs = 10 ** 9 * 10 ** 18 - 5000
     assert token.balanceOf(accounts[0]) == maxs
 
     boostpool.activateStaking({"from": accounts[0]})
     boostpool.stake(1000, {"from": accounts[0]})
 
+    assert boostpool.totalAmountStaked() == 1000
     assert token.balanceOf(boostpool) == 1000
     assert token.balanceOf(accounts[0]) == maxs - 1000
 
@@ -28,16 +29,21 @@ def test_basic(accounts, token, boostpool):
         boostpool.stake(1000, {"from": accounts[0]})
 
 
-def test_unstake(accounts, token, boostpool):
-    token.approve(boostpool, 2000, {"from": accounts[0]})
-    boostpool.depositOwner(2000, {"from": accounts[0]})
-    maxs = 10 ** 9 * 10 ** 18
+def test_unstake(accounts, token, token2, boostpool):
+    depositOwner = 2000
+    token.approve(boostpool, depositOwner, {"from": accounts[0]})
+    boostpool.depositOwner(depositOwner, {"from": accounts[0]})
+    maxs = 10 ** 9 * 10 ** 18 - 5000
     boostpool.activateStaking({"from": accounts[0]})
 
-    token.approve(boostpool, 1000, {"from": accounts[0]})
-    boostpool.stake(1000, {"from": accounts[0]})
+    stakeAmount = 1000
+    token.approve(boostpool, stakeAmount, {"from": accounts[0]})
+    boostpool.stake(stakeAmount, {"from": accounts[0]})
+    assert boostpool.totalAmountStaked() == stakeAmount
 
     chain.sleep(60 * 60 * 24 * 31)
+
+    assert token.balanceOf(accounts[0]) == maxs - stakeAmount  - depositOwner
 
     tx = boostpool.unstake({"from": accounts[0]})
     # assert tx.events.keys() == ""
@@ -47,6 +53,46 @@ def test_unstake(accounts, token, boostpool):
     assert tx.events["Unstake"][0]["yieldAmount"] == 1000
     # maxs = 10 ** 9 * 10 ** 18
     # assert token.balanceOf(accounts[0]) == maxs
+
+    assert boostpool.totalAmountStaked() == 0
+
+    assert token.balanceOf(accounts[0]) == maxs  - depositOwner
+
+    # assert token2.balanceOf(accounts[0]) == 5000
+
+
+
+def test_unstake2(accounts, token, token2, boostpool):
+    depositOwner = 2000
+    orig = token.balanceOf(accounts[1])
+    orig2 = token2.balanceOf(accounts[1])
+    
+    token.approve(boostpool, depositOwner, {"from": accounts[0]})
+    boostpool.depositOwner(depositOwner, {"from": accounts[0]})
+    maxs = 10 ** 9 * 10 ** 18
+    boostpool.activateStaking({"from": accounts[0]})
+
+    stakeAmount = 1000
+    token.approve(boostpool, stakeAmount, {"from": accounts[1]})
+    boostpool.stake(stakeAmount, {"from": accounts[1]})
+    assert boostpool.totalAmountStaked() == stakeAmount
+
+    chain.sleep(60 * 60 * 24 * 31)
+
+    assert token.balanceOf(accounts[1]) == orig - stakeAmount
+
+    rewardAmount = 1 * stakeAmount
+    before = token2.balanceOf(accounts[1])
+    tx = boostpool.unstake({"from": accounts[1]})
+    after = token2.balanceOf(accounts[1])
+    assert after - before == 1000
+    assert tx.events["Unstake"]["yieldAmount"] == 1000
+    # assert token.balanceOf(accounts[1]) == orig
+    assert token2.balanceOf(accounts[1]) == orig2 + rewardAmount
+
+    # assert boostpool.totalAmountStaked() == 0
+
+    # assert token.balanceOf(accounts[0]) == maxs  - depositOwner
 
 
 # def test_stakereward(accounts, token, boostpool):

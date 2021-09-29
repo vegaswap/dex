@@ -13,12 +13,16 @@ def isolate(fn_isolation):
 
 @pytest.fixture(scope="module")
 def token(VegaToken, accounts):
-    return VegaToken.deploy({"from": accounts[0]})
+    token = VegaToken.deploy({"from": accounts[0]})
+    token.transfer(accounts[1],5000, {"from": accounts[0]})
+    return token
 
 
 @pytest.fixture(scope="module")
 def token2(VegaToken, accounts):
-    return VegaToken.deploy({"from": accounts[0]})
+    token = VegaToken.deploy({"from": accounts[0]})
+    token.transfer(accounts[1],5000, {"from": accounts[0]})
+    return token
 
 
 @pytest.fixture(scope="module")

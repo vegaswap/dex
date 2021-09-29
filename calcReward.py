@@ -1,17 +1,5 @@
 # simulation of reward function
 
-#VGA
-# rewardDay = 2
-# lockDuration = 30
-rewardVGA = 13
-priceVGA = 0.015
-
-# rewardTotal = rewardDay * lockDuration
-# rewardTotal = 60
-
-yieldAmount = 2000000
-
-yieldUSD = yieldAmount * priceVGA
 
 # print("in USDT ",yieldUSD)
 # print("yield ",yieldAmount)
@@ -33,13 +21,25 @@ def back_calc():
     print("reward VGA ", reward)
     print("reward VGA per USD ", reward/stake)
 
-# stakeAmount = 1000
-# reward = rewardVGA * stakeAmount
-# rewardUSD = reward * priceVGA
-# ROI = rewardUSD/stakeAmount
-# print(ROI)
+#VGA
+# rewardDay = 2
+# lockDuration = 30
+rewardVGA = 10
+priceVGA = 0.015
 
-back_calc()
+# rewardTotal = rewardDay * lockDuration
+# rewardTotal = 60
+
+yieldAmount = 2000000
+yieldUSD = yieldAmount * priceVGA
+stakeAmount = 1000
+reward = rewardVGA * stakeAmount
+rewardUSD = reward * priceVGA
+ROI = rewardUSD/stakeAmount
+print("ROI ", ROI)
+apy = calc_apy(ROI, 30)
+print("APY ", apy)
+# back_calc()
 
 # print("reward/day per $ ", (reward/30)/stake)
 # reward = rewardDay * lockDuration * stakeAmount
