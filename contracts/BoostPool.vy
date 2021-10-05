@@ -42,7 +42,7 @@ totalAmountStaked: public(uint256)
 stakingActive: public(bool)
 reward: public(uint256)
 rewardSteps: public(uint256[2])
-# stakeSteps: public(uint256[5])
+stakeSteps: public(uint256[2])
 rewardQuote: public(uint256)
 
 event Deposit:
@@ -83,6 +83,7 @@ def __init__(
     _duration: uint256,
     # _reward: uint256,   
     _rewardSteps: uint256[2],
+    _stakeSteps: uint256[2],
     # _stakeSteps: uint256,
     _maxYield: uint256,
     _stakeDecimals: uint256,
@@ -100,6 +101,7 @@ def __init__(
     self.duration = _duration
     # self.reward = _reward
     self.rewardSteps = _rewardSteps
+    self.stakeSteps = _stakeSteps
     self.rewardQuote = 1
     self.maxYield = _maxYield
     self.maxPerStake = _maxPerStake
@@ -112,6 +114,11 @@ def __init__(
     self.startTime = block.timestamp
     self.endTime = self.startTime + (self.duration * days)
 
+
+@internal
+def _currentReward() -> uint256:
+    currentBracket: uint256 = 0
+    return self.rewardSteps[currentBracket]
 
 @external
 def stake(_stakeAmount: uint256):
@@ -131,8 +138,8 @@ def stake(_stakeAmount: uint256):
     # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
     #TODO
     #reward based on total amount staked
-    currentBracket: uint256 = 0
-    _yieldAmount: uint256 = _stakeAmount * self.rewardSteps[currentBracket]/self.rewardQuote
+    r: uint256 = self._currentReward()
+    _yieldAmount: uint256 = _stakeAmount * r/self.rewardQuote
 
     assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
     self.staker_addresses[self.stakeCount] = msg.sender

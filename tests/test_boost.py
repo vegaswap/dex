@@ -19,7 +19,7 @@ def test_basic(accounts, token, boostpool):
     assert s[0] == accounts[0]
     assert s[1] == 1000
     assert s[2] > chain.time() - 10000
-    assert s[3] == 1000
+    assert s[3] == 5000
     # assert s[5] == True
     # assert s[6] == True
 
@@ -50,7 +50,7 @@ def test_unstake(accounts, token, token2, boostpool):
     assert tx.events["Unstake"][0]["stakeAddress"] == accounts[0]
     assert tx.events["Unstake"][0]["lockDays"] == 31
     assert tx.events["Unstake"][0]["stakeAmount"] == 1000
-    assert tx.events["Unstake"][0]["yieldAmount"] == 1000
+    assert tx.events["Unstake"][0]["yieldAmount"] == 5000
     # maxs = 10 ** 9 * 10 ** 18
     # assert token.balanceOf(accounts[0]) == maxs
 
@@ -81,12 +81,12 @@ def test_unstake2(accounts, token, token2, boostpool):
 
     assert token.balanceOf(accounts[1]) == orig - stakeAmount
 
-    rewardAmount = 1 * stakeAmount
+    rewardAmount = 5 * stakeAmount
     before = token2.balanceOf(accounts[1])
     tx = boostpool.unstake({"from": accounts[1]})
     after = token2.balanceOf(accounts[1])
-    assert after - before == 1000
-    assert tx.events["Unstake"]["yieldAmount"] == 1000
+    assert after - before == 5000
+    assert tx.events["Unstake"]["yieldAmount"] == 5000
     # assert token.balanceOf(accounts[1]) == orig
     assert token2.balanceOf(accounts[1]) == orig2 + rewardAmount
 
