@@ -37,8 +37,25 @@ def main():
         print(accounts[0],": ",bal/10**18)
 
         # token = VegaToken.deploy({'from':accounts[0]})
+        # print(token)
         # token.transfer(accounts[1], 100*10**18, {'from':accounts[0]})
-        vegatoken = "0xD64f3381C0Ea50b631290Bc836d3BD57BF7B002F"
+        vegatoken = VegaToken.at("0x8076584601196a6261Fe03366b006E7867edF198")
+        print(vegatoken.balanceOf(accounts[0]))
+        
+        # boostpool = "0xAee1bdf0D313F6B2F0A6627E1Ff81AFb34bBb283"
+
+        # maxy = 10000 * 10 ** 18
+        # bpool = BoostPool.deploy(
+        #     vegatoken.address,
+        #     vegatoken.address,
+        #     30,
+        #     1,
+        #     maxy,
+        #     18,
+        #     18,
+        #     1000 * 10 ** 18,
+        #     {"from": accounts[0]},
+        # )
 
         # maxy = 10000 * 10 ** 18
         # #TODO yield token
@@ -53,8 +70,7 @@ def main():
         #     {"from": accounts[0]},
         # )
         # print("bpool ", bpool)
-        bpool = "0x6f46A988282FE5800267e756cB148F2C7e281bC8"
-        print(netw)
+        # print(netw)
 
 
     # elif network.show_active() == 'kovan':

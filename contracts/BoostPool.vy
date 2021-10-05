@@ -6,11 +6,13 @@
 
 # 30 days, 60 days
 
+# TODO: define time window for staking
 # TODO: token availability?
 # TODO: dynamic formula
-# TODO: define time window for staking
-# TODO: dynamic price
-# 
+
+# TODO: double check exhaustion
+# consider: dynamic price
+
 #     t0          t1     t2     t3
 #     announce    start  final  unstake event
 
@@ -29,9 +31,9 @@ days: constant(uint256) = 86400
 stakeDecimals: uint256
 yieldDecimals: uint256
 #in days
-duration: uint256
-startTime: uint256
-endTime: uint256
+duration: public(uint256)
+startTime: public(uint256)
+endTime: public(uint256)
 #total number of yield promised
 yieldTotal: public(uint256)
 maxPerStake: public(uint256)
@@ -39,7 +41,7 @@ maxYield: uint256
 totalAmountStaked: public(uint256)
 stakingActive: public(bool)
 reward: public(uint256)
-# rewardSteps: public(uint256[5])
+rewardSteps: public(uint256[2])
 # stakeSteps: public(uint256[5])
 rewardQuote: public(uint256)
 
@@ -79,8 +81,8 @@ def __init__(
     _stakeToken: address,
     _yieldToken: address,
     _duration: uint256,
-    _reward: uint256,   
-    # _rewardSteps: uint256,
+    # _reward: uint256,   
+    _rewardSteps: uint256[2],
     # _stakeSteps: uint256,
     _maxYield: uint256,
     _stakeDecimals: uint256,
@@ -96,7 +98,8 @@ def __init__(
     self.StakeToken = _stakeToken
     self.YieldToken = _yieldToken
     self.duration = _duration
-    self.reward = _reward
+    # self.reward = _reward
+    self.rewardSteps = _rewardSteps
     self.rewardQuote = 1
     self.maxYield = _maxYield
     self.maxPerStake = _maxPerStake
@@ -126,7 +129,10 @@ def stake(_stakeAmount: uint256):
     assert not self.stakes[msg.sender].isAdded, "BoostPool: can only stake once"
     
     # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
-    _yieldAmount: uint256 = _stakeAmount * self.reward/self.rewardQuote
+    #TODO
+    #reward based on total amount staked
+    currentBracket: uint256 = 0
+    _yieldAmount: uint256 = _stakeAmount * self.rewardSteps[currentBracket]/self.rewardQuote
 
     assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
     self.staker_addresses[self.stakeCount] = msg.sender
@@ -156,7 +162,8 @@ def unstake():
     assert self.stakes[msg.sender].staked, "BoostPool: unstaked already"
 
     lockduration: uint256 = block.timestamp - self.stakes[msg.sender].stakeTime
-    lockdays: uint256 = lockduration/(60*60*24)    
+    # days: uint256 = 60*60*24
+    lockdays: uint256 = lockduration/days
     assert lockdays >= self.duration, "BoostPool: not locked for duration"    
     # self.stakes[msg.sender].duration, "BoostPool: not locked according to duration"
 

@@ -29,7 +29,7 @@ def token2(VegaToken, accounts):
 def boostpool(token, token2, accounts):
     maxy = 10000 * 10 ** 18
     dur = 30
-    reward = 1
+    reward = [1, 2]
     maxs = 1000 * 10 ** 18
     pool = BoostPool.deploy(
         token.address,
@@ -50,7 +50,7 @@ def boostpool(token, token2, accounts):
 def boostpool2(token, token2, accounts):
     maxy = 10000 * 10 ** 18
     dur = 30
-    reward = 5
+    reward = [5]
     maxs = 1000 * 10 ** 18
     pool = BoostPool.deploy(
         token.address,
