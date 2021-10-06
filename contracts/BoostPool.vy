@@ -28,8 +28,8 @@ owner: address
 StakeToken: public(address)
 YieldToken: public(address)
 days: constant(uint256) = 86400
-stakeDecimals: uint256
-yieldDecimals: uint256
+stakeDecimals: public(uint256)
+yieldDecimals: public(uint256)
 #in days
 duration: public(uint256)
 startTime: public(uint256)
@@ -37,7 +37,8 @@ endTime: public(uint256)
 #total number of yield promised
 yieldTotal: public(uint256)
 maxPerStake: public(uint256)
-maxYield: uint256
+maxYield: public(uint256)
+maxStake: public(uint256)
 totalAmountStaked: public(uint256)
 stakingActive: public(bool)
 reward: public(uint256)
@@ -72,7 +73,7 @@ struct Stake:
 
 # TOOD consider max array
 staker_addresses: public(address[10000])
-stakeCount: uint256
+stakeCount: public(uint256)
 stakes: public(HashMap[address, Stake])
 
 
@@ -86,6 +87,7 @@ def __init__(
     _stakeSteps: uint256[2],
     # _stakeSteps: uint256,
     _maxYield: uint256,
+    _totalAmountStaked: uint256,
     _stakeDecimals: uint256,
     _yieldDecimals: uint256,
     _maxPerStake: uint256,
@@ -104,6 +106,7 @@ def __init__(
     self.stakeSteps = _stakeSteps
     self.rewardQuote = 1
     self.maxYield = _maxYield
+    self.totalAmountStaked= _totalAmountStaked
     self.maxPerStake = _maxPerStake
     self.stakeDecimals = _stakeDecimals
     self.yieldDecimals = _yieldDecimals
@@ -126,6 +129,8 @@ def stake(_stakeAmount: uint256):
     assert block.timestamp < self.endTime, "BoostPool: ended"
     assert block.timestamp >= self.startTime, "BoostPool: not started"
     assert _stakeAmount <= self.maxPerStake, "BoostPool: more than maximum stake"
+
+    assert self.totalAmountStaked + _stakeAmount <= self.maxStake,  "BoostPool: maximum staked"
 
     bal: uint256 = ERC20(self.StakeToken).balanceOf(msg.sender)
     unclaimed: uint256 = bal - self.totalAmountStaked

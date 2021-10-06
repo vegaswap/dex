@@ -28,6 +28,7 @@ def token2(VegaToken, accounts):
 @pytest.fixture(scope="module")
 def boostpool(token, token2, accounts):
     maxy = 10000 * 10 ** 18
+    maxStake = 100000 * 10 ** 18
     dur = 30
     reward = [5, 2]
     ssteps = [0, 1000]
@@ -39,6 +40,7 @@ def boostpool(token, token2, accounts):
         reward,
         ssteps,
         maxy,
+        maxStake,
         # 1000 * 10 ** 18,
         18,
         18,
@@ -51,6 +53,7 @@ def boostpool(token, token2, accounts):
 @pytest.fixture(scope="module")
 def boostpool2(token, token2, accounts):
     maxy = 10000 * 10 ** 18
+    maxStake = 100000 * 10 ** 18
     dur = 30
     reward = [5]
     ssteps = [0]
@@ -61,6 +64,7 @@ def boostpool2(token, token2, accounts):
         dur,
         reward,
         maxy,
+        maxStake,
         # 1000 * 10 ** 18,
         18,
         18,
