@@ -36,8 +36,7 @@ def __init__(tokenBase: address,tokenQuote: address):
 
 @external
 def initLiquidity(x: uint256, y: uint256):
-    assert msg.sender == self.admin, "not the admin"
-    #TODO deposit
+    assert msg.sender == self.admin, "not the admin"    
     self.x = x
     self.y = y
     assert ERC20(self.tokenBase).transferFrom(msg.sender, self, x), "transfer base filed"
@@ -82,8 +81,13 @@ def swapOut(dx: uint256):
 @external
 def addLiq(ix: uint256):
     assert msg.sender == self.admin, "not the admin"
-    xPerShare: uint256 = self.x/self.totalShares
-    sharesPurchased: uint256 = ix / xPerShare
+    # xPerShare: uint256 = self.x/self.totalShares
+    # sharesPurchased: uint256 = ix / xPerShare
+
+    amountX: uint256 = 
+    assert ERC20(self.tokenBase).transferFrom(msg.sender, self, x), "transfer base filed"
+    assert ERC20(self.tokenQuote).transferFrom(msg.sender, self, y), "transfer quote failed"
+
     #yPerShare: uint256 = self.y/totalShares
     #iy: uint256 = sharesPurchased * yPerShare
 
