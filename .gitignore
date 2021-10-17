@@ -1,0 +1,10 @@
+scripts/sendfunds.py
+.clj-kondo/
+client/node_modules
+__pycache__
+.history
+.hypothesis/
+build/
+reports/
+scripts/
+client/

@@ -1,0 +1,10 @@
+{
+    "1337":
+    { "VegaToken" : "0xDe6D2D63b10c088263B55154638746bD1057312F",    
+    "BoostPool": "0xb804b6C73bFc1A1f528985b1410B61677a4B161A" },
+    "97":
+    { "VegaToken" : "0xD64f3381C0Ea50b631290Bc836d3BD57BF7B002F",    
+        "BoostPool": "0x33a4D37D0ed87F9C21d1B7c74E4d2EB3Cea382f2"
+    }
+
+}
