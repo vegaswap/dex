@@ -166,6 +166,7 @@ def stake(_stakeAmount: uint256):
 
     assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
     self.staker_addresses[self.stakeCount] = msg.sender
+    self.stakeCount +=1
     self.stakes[msg.sender] = Stake(
         {
             stakeAddress: msg.sender,
