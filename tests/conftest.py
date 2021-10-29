@@ -14,14 +14,14 @@ def isolate(fn_isolation):
 @pytest.fixture(scope="module")
 def token(VegaToken, accounts):
     token = VegaToken.deploy({"from": accounts[0]})
-    token.transfer(accounts[1], 5000, {"from": accounts[0]})
+    token.transfer(accounts[1], 5000 * 10**18, {"from": accounts[0]})
     return token
 
 
 @pytest.fixture(scope="module")
 def token2(VegaToken, accounts):
     token = VegaToken.deploy({"from": accounts[0]})
-    token.transfer(accounts[1], 5000, {"from": accounts[0]})
+    token.transfer(accounts[1], 5000 * 10**18, {"from": accounts[0]})
     return token
 
 
@@ -33,6 +33,7 @@ def boostpool(token, token2, accounts):
     reward = [5, 2, 0, 0, 0]
     ssteps = [0, 1000, 1000, 1000, 1000]
     maxs = 1000 * 10 ** 18
+    mins = 100 * 10 ** 18
     pool = BoostPool.deploy(
         token.address,
         token2.address,
@@ -43,6 +44,7 @@ def boostpool(token, token2, accounts):
         18,
         18,
         maxs,
+        mins,
         reward,
         ssteps,
         {"from": accounts[0]},

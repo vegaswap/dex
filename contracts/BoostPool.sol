@@ -30,7 +30,7 @@ contract BoostPool {
     uint256[] public rewardSteps;
     uint256[] public stakeSteps;
     uint256 public rewardQuote;
-    // uint256 minPerStake
+    uint256 public minPerStake;
 
     event Deposit(uint256 amount);
     event StakeAdded(address stakeAddress, uint256 stakeAmount, uint256 stakeTime);
@@ -60,6 +60,7 @@ contract BoostPool {
         uint256 _stakeDecimals,
         uint256 _yieldDecimals,
         uint256 _maxPerStake,
+        uint256 _minPerStake,
         uint256[] memory _rewardSteps,
         uint256[] memory _stakeSteps
     ){
@@ -70,6 +71,7 @@ contract BoostPool {
         duration = _duration;
         maxYield = _maxYield;
         maxStake = _maxStake;
+        minPerStake = _minPerStake;
         stakeDecimals = _stakeDecimals;
         yieldDecimals = _yieldDecimals;
         maxPerStake = _maxPerStake;        
@@ -84,7 +86,6 @@ contract BoostPool {
         currentStep = 0;
         rewardQuote = 1;
         currentReward = _rewardSteps[0];
-        //minPerStake = 1
 
     }    
 
@@ -97,10 +98,10 @@ contract BoostPool {
 
     function stake(uint256 _stakeAmount) public {
 
-        // assert block.timestamp < self.endTime, "BoostPool: ended"
-        // assert block.timestamp >= self.startTime, "BoostPool: not started"
-        // assert _stakeAmount <= self.maxPerStake, "BoostPool: more than maximum stake"
-        // assert _stakeAmount >= self.minPerStake, "BoostPool: not enough"
+        require(block.timestamp < endTime, "BoostPool: ended");
+        require(block.timestamp >= startTime, "BoostPool: not started");
+        require(_stakeAmount <= maxPerStake, "BoostPool: more than maximum stake");
+        require(_stakeAmount >= minPerStake, "BoostPool: not enough");
         // assert self.totalAmountStaked + _stakeAmount <= self.maxStake,  "BoostPool: maximum staked"
         require(!stakes[msg.sender].isAdded, "BoostPool: can only stake once");
 
@@ -119,6 +120,7 @@ contract BoostPool {
 
         //assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
         
+        require(ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount),"BoostPool: transfer failed");
         staker_addresses.push(msg.sender);
 
         stakes[msg.sender] = Stake(
@@ -139,8 +141,6 @@ contract BoostPool {
         // //log StakeAdded(msg.sender, _stakeAmount, block.timestamp)
 
         // //# transfer tokens
-        bool transferSuccess = ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount);
-        require(transferSuccess, "BoostPool: transfer failed");
 
     }
 
