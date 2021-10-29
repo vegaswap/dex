@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+//Boost Pool
+//a pool for fixed duration staking rewards
+
 import "./erc20.sol";
 
 contract BoostPool {
@@ -11,20 +14,14 @@ contract BoostPool {
     address public yieldToken;
     uint256 public startTime;
     uint256 public endTime;
-    // #in days
-    // days: constant(uint256) = 86400
-    uint256 public duration;
-
+    uint256 public duration; // how long to stake, fixed in time at start of the pool
     uint256 public stakeDecimals;
     uint256 public yieldDecimals;
-    // #total number of yield promised
-    uint256 public yieldTotal;
+    uint256 public yieldTotal; //total of yield promised
     uint256 public maxPerStake;
     uint256 public maxYield;
     uint256 public maxStake;
     uint256 public totalAmountStaked;
-    //bool public stakingActive;
-    // # reward
     uint256 public currentStep;
     uint256 public currentReward;
     uint256[] public rewardSteps;
@@ -42,10 +39,10 @@ contract BoostPool {
         address stakeAddress;
         uint256 stakeAmount;
         uint256 stakeTime;
-        //# duration: uint256
         uint256 yieldAmount;
         bool isAdded;
         bool staked;
+        //duration;
     }
     
     address[] public staker_addresses;
@@ -77,8 +74,6 @@ contract BoostPool {
         maxPerStake = _maxPerStake;        
         rewardSteps = _rewardSteps;        
         stakeSteps = _stakeSteps;  
-        //self.stakingActive = True      
-        //self.yieldTotal = 0
         startTime = block.timestamp;
         endTime = startTime + 30 * (1 days);
 
@@ -86,11 +81,12 @@ contract BoostPool {
         currentStep = 0;
         rewardQuote = 1;
         currentReward = _rewardSteps[0];
+        yieldTotal = 0;
 
     }    
 
     function setCurrentReward() public {
-        //loop through stakesteps
+        //TODO loop through stakesteps?
         if (totalAmountStaked > stakeSteps[currentStep+1]){
             currentStep++;
         }
@@ -102,23 +98,19 @@ contract BoostPool {
         require(block.timestamp >= startTime, "BoostPool: not started");
         require(_stakeAmount <= maxPerStake, "BoostPool: more than maximum stake");
         require(_stakeAmount >= minPerStake, "BoostPool: not enough");
-        // assert self.totalAmountStaked + _stakeAmount <= self.maxStake,  "BoostPool: maximum staked"
+        require(totalAmountStaked + _stakeAmount <= maxStake,  "BoostPool: maximum staked");
         require(!stakes[msg.sender].isAdded, "BoostPool: can only stake once");
 
-        //uint256 bal = ERC20(stakeToken).balanceOf(msg.sender);
+        uint256 bal = ERC20(stakeToken).balanceOf(msg.sender);
 
-        //unclaimed: uint256 = bal - self.totalAmountStaked
-        // assert unclaimed >= _stakeAmount, "BoostPool: need the tokens to stake"
-        // # assert _duration >= 30, "BoostPool: need to stake at least 30 days"
-        // # assert amount >= self.minstake
+        uint256 unclaimed = bal - totalAmountStaked;
+        require(unclaimed >= _stakeAmount, "BoostPool: need the tokens to stake");
 
         // # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
-        // #TODO
-        // #reward based on total amount staked
 
         uint256 _yieldAmount = _stakeAmount * currentReward/rewardQuote;
 
-        //assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
+        require(yieldTotal + _yieldAmount <= maxYield, "BoostPool: rewards exhausted");
         
         require(ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount),"BoostPool: transfer failed");
         staker_addresses.push(msg.sender);
@@ -128,7 +120,6 @@ contract BoostPool {
             stakeAddress: msg.sender,
             stakeAmount: _stakeAmount,
             stakeTime: block.timestamp,
-            //# duration: _duration,
             yieldAmount: _yieldAmount,
             isAdded: true,
             staked: true
@@ -138,24 +129,20 @@ contract BoostPool {
 
         setCurrentReward();
 
-        // //log StakeAdded(msg.sender, _stakeAmount, block.timestamp)
-
-        // //# transfer tokens
+        emit StakeAdded(msg.sender, _stakeAmount, block.timestamp);
 
     }
 
     function unstake() public {
 
-        //b: uint256 = ERC20(self.StakeToken).balanceOf(msg.sender)
-        //assert self.stakes[msg.sender].isAdded, "BoostPool: not a stakeholder"
-        //assert self.stakes[msg.sender].staked, "BoostPool: unstaked already"
+        require(stakes[msg.sender].isAdded, "BoostPool: not a stakeholder");
+        //uint256 b = ERC20(stakeToken).balanceOf(msg.sender);
+        require(stakes[msg.sender].staked, "BoostPool: not staked");
 
         uint256 lockduration = block.timestamp - stakes[msg.sender].stakeTime;
         uint256 lockdays = lockduration/1 days;
 
         require(lockdays >= duration, "BoostPool: not locked for duration");
-
-        //self.stakes[msg.sender].duration, "BoostPool: not locked according to duration"
 
         //transfer stake
         bool transferStakeSuccess = ERC20(stakeToken).transfer(msg.sender, stakes[msg.sender].stakeAmount);
@@ -163,12 +150,11 @@ contract BoostPool {
         //transfer yield
         bool transferYieldSuccess = ERC20(yieldToken).transfer(msg.sender, stakes[msg.sender].yieldAmount);
         require(transferYieldSuccess, "BoostPool: sending yield failed");
-        //assert ERC20(self.).transfer(msg.sender, self.stakes[msg.sender].), "BoostPool: sending yield failed"
 
         stakes[msg.sender].staked = false;
 
         totalAmountStaked -= stakes[msg.sender].stakeAmount;
-        //log Unstake(msg.sender, lockdays, self.stakes[msg.sender].stakeAmount, self.stakes[msg.sender].yieldAmount)
+        emit Unstaked(msg.sender, lockdays, stakes[msg.sender].stakeAmount, stakes[msg.sender].yieldAmount);
 
     }
 
