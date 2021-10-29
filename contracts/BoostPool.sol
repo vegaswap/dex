@@ -32,8 +32,8 @@ contract BoostPool {
     event Deposit(uint256 amount);
     event StakeAdded(address stakeAddress, uint256 stakeAmount, uint256 stakeTime);
     event Unstaked(address stakeAddress, uint256 lockDays, uint256 stakeAmount,uint256 yieldAmount);
-    //event OwnerDeposit();
-    //event OwnerWithdraw();
+    event OwnerDeposit(uint256 amount);
+    event OwnerWithdraw(uint256 amount);
     
     struct Stake {
         address stakeAddress;
@@ -157,36 +157,29 @@ contract BoostPool {
         emit Unstaked(msg.sender, lockdays, stakes[msg.sender].stakeAmount, stakes[msg.sender].yieldAmount);
 
     }
-
-    //only Admin
+    
     function depositOwner(uint256 amount) public {
         require(msg.sender == owner, "not the owner");
 
-        //     assert (
-        //     ERC20(self.YieldToken).allowance(msg.sender, self) >= amount
-        // ), "BoostPool: not enough allowance"
-
-        //     assert (
-        //     ERC20(self.YieldToken).balanceOf(msg.sender) >= amount
-        // ), "BoostPool: not enough balance"
+        require (ERC20(yieldToken).allowance(msg.sender, address(this)) >= amount,"BoostPool: not enough allowance");
+        require (ERC20(yieldToken).balanceOf(msg.sender) >= amount,"BoostPool: not enough balance");
 
         bool transferYieldSuccess = ERC20(yieldToken).transferFrom(msg.sender, address(this), amount);
         require(transferYieldSuccess, "BoostPool: sending yield failed");
-        //log Deposit(amount)
 
+        emit OwnerDeposit(amount);
     }
 
     function withdrawOwner(uint256 amount) public {
         require(msg.sender == owner, "not the owner");
-        // bucketbalance: uint256 = ERC20(self.YieldToken).balanceOf(self)
-        // unclaimedbalance: uint256 = bucketbalance - self.totalAmountStaked
-        // assert amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts"
+        uint256 bucketbalance = ERC20(yieldToken).balanceOf(address(this));
+        uint256 unclaimedbalance = bucketbalance - totalAmountStaked;
+        require(amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts");
 
         bool transferYieldSuccess = ERC20(yieldToken).transfer(msg.sender, amount);
         require(transferYieldSuccess, "BoostPool: withdrawOwner");
 
-        // # log WithdrawOwner(msg.sender, amount)
-
+        emit OwnerWithdraw(amount);
     }
 
 }
