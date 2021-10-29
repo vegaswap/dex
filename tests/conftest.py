@@ -36,15 +36,15 @@ def boostpool(token, token2, accounts):
     pool = BoostPool.deploy(
         token.address,
         token2.address,
-        dur,
-        reward,
-        ssteps,
+        dur,        
         maxy,
         maxStake,
         # 1000 * 10 ** 18,
         18,
         18,
         maxs,
+        reward,
+        ssteps,
         {"from": accounts[0]},
     )
     token2.transfer(pool, 10000 * 10 ** 18, {"from": accounts[0]})

@@ -1,25 +1,5 @@
 # @version ^0.2.15
 
-# boost pool
-# functions like airdrop
-# fixed rate at the beginning
-
-# 30 days, 60 days
-
-# TODO: define time window for staking
-# TODO: token availability?
-# TODO: dynamic formula
-
-# TODO: double check exhaustion
-# consider: dynamic price
-
-#     t0          t1     t2     t3
-#     announce    start  final  unstake event
-
-# todo: how to avoid sell after unstake event
-# rolling time window?
-# consider extra lock
-# max stake is like logartihmic interest rate
 
 from vyper.interfaces import ERC20
 

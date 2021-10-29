@@ -49,7 +49,6 @@ contract BoostPool {
     }
     
     address[] public staker_addresses;
-    uint256 public stakeCount;
     mapping(address => Stake) public stakes;
 
     constructor(
@@ -84,6 +83,7 @@ contract BoostPool {
         totalAmountStaked = 0;
         currentStep = 0;
         rewardQuote = 1;
+        currentReward = _rewardSteps[0];
         //minPerStake = 1
 
     }    
@@ -97,13 +97,12 @@ contract BoostPool {
 
     function stake(uint256 _stakeAmount) public {
 
-        // assert self.stakingActive, "BoostPool: staking not active"    
         // assert block.timestamp < self.endTime, "BoostPool: ended"
         // assert block.timestamp >= self.startTime, "BoostPool: not started"
         // assert _stakeAmount <= self.maxPerStake, "BoostPool: more than maximum stake"
         // assert _stakeAmount >= self.minPerStake, "BoostPool: not enough"
         // assert self.totalAmountStaked + _stakeAmount <= self.maxStake,  "BoostPool: maximum staked"
-        //assert not self.stakes[msg.sender].isAdded, "BoostPool: can only stake once"
+        require(!stakes[msg.sender].isAdded, "BoostPool: can only stake once");
 
         //uint256 bal = ERC20(stakeToken).balanceOf(msg.sender);
 
@@ -119,8 +118,8 @@ contract BoostPool {
         uint256 _yieldAmount = _stakeAmount * currentReward/rewardQuote;
 
         //assert self.yieldTotal + _yieldAmount <= self.maxYield, "BoostPool: rewards exhausted"
-        staker_addresses[stakeCount] = msg.sender;
-        stakeCount +=1;
+        
+        staker_addresses.push(msg.sender);
 
         stakes[msg.sender] = Stake(
         {
@@ -137,9 +136,9 @@ contract BoostPool {
 
         setCurrentReward();
 
-        //log StakeAdded(msg.sender, _stakeAmount, block.timestamp)
+        // //log StakeAdded(msg.sender, _stakeAmount, block.timestamp)
 
-        //# transfer tokens
+        // //# transfer tokens
         bool transferSuccess = ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount);
         require(transferSuccess, "BoostPool: transfer failed");
 
