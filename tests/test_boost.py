@@ -30,40 +30,41 @@ def test_basic(accounts, token, token2, boostpool):
         boostpool.stake(1000 * 10**18, {"from": accounts[0]})
 
 
-# def test_unstake(accounts, token, token2, boostpool):
-#     depositOwner = 2000
-#     token2.approve(boostpool, depositOwner, {"from": accounts[0]})
-#     boostpool.depositOwner(depositOwner, {"from": accounts[0]})
-#     maxs = 10 ** 9 * 10 ** 18 - 5000
-#     boostpool.activateStaking({"from": accounts[0]})
+def test_unstake(accounts, token, token2, boostpool):
+    depositOwner = 2000 * 10**18
+    token2.approve(boostpool, depositOwner, {"from": accounts[0]})
+    boostpool.depositOwner(depositOwner, {"from": accounts[0]})
+    maxs = 10 ** 9 * 10 ** 18
 
-#     stakeAmount = 1000
-#     stakeAccount = accounts[1]
-#     token.approve(boostpool, stakeAmount, {"from": stakeAccount})
-#     boostpool.stake(stakeAmount, {"from": stakeAccount})
-#     assert boostpool.totalAmountStaked() == stakeAmount
+    stakeAmount = 1000* 10**18
+    stakeAccount = accounts[1]
+    token.approve(boostpool, stakeAmount, {"from": stakeAccount})
+    boostpool.stake(stakeAmount, {"from": stakeAccount})
+    assert boostpool.totalAmountStaked() == stakeAmount
 
-#     chain.sleep(60 * 60 * 24 * 31)
-
-#     assert token.balanceOf(accounts[0]) == maxs
-#     # assert token2.balanceOf(accounts[0]) == maxs - depositOwner
+    chain.sleep(60 * 60 * 24 * 31)
+ 
+    #assert token.balanceOf(accounts[0]) == maxs - depositOwner  
+    # assert token2.balanceOf(accounts[0]) == maxs - depositOwner
     
-#     # assert token2.balanceOf(stakeAccount) == maxs - stakeAmount - depositOwner
+    # assert token2.balanceOf(stakeAccount) == maxs - stakeAmount - depositOwner
 
-#     tx = boostpool.unstake({"from": stakeAccount})
-#     # assert tx.events.keys() == ""
-#     assert tx.events["Unstake"][0]["stakeAddress"] == stakeAccount
-#     assert tx.events["Unstake"][0]["lockDays"] == 31
-#     assert tx.events["Unstake"][0]["stakeAmount"] == 1000
-#     assert tx.events["Unstake"][0]["yieldAmount"] == 5000
-#     # maxs = 10 ** 9 * 10 ** 18
-#     # assert token.balanceOf(accounts[0]) == maxs
+    tx = boostpool.unstake({"from": stakeAccount})
+    # assert tx.events.keys() == ""
+    assert tx.events["Unstaked"][0]["stakeAddress"] == stakeAccount
+    #assert tx.events["Unstaked"][0]["lockDays"] == 31
+    assert tx.events["Unstaked"][0]["stakeAmount"] == 1000 * 10**18
+    assert tx.events["Unstaked"][0]["yieldAmount"] == 5000 * 10**18
+    # maxs = 10 ** 9 * 10 ** 18
+    a1 = token.balanceOf(accounts[0])
+    a2 = token.balanceOf(accounts[1])
+    assert a1 + a2 == maxs
 
-#     assert boostpool.totalAmountStaked() == 0
+    #assert boostpool.totalAmountStaked() == 0
 
-#     # assert token.balanceOf(accounts[0]) == maxs - depositOwner
+    # assert token.balanceOf(accounts[0]) == maxs - depositOwner
 
-#     # assert token2.balanceOf(accounts[0]) == 5000
+    # assert token2.balanceOf(accounts[0]) == 5000
 
 
 # def test_unstake2(accounts, token, token2, boostpool):

@@ -14,7 +14,7 @@ contract BoostPool {
     address public yieldToken;
     uint256 public startTime;
     uint256 public endTime;
-    uint256 public duration; // how long to stake, fixed in time at start of the pool
+    //uint256 public duration; // how long to stake, fixed in time at start of the pool
     uint256 public stakeDecimals;
     uint256 public yieldDecimals;
     uint256 public yieldTotal; //total of yield promised
@@ -23,7 +23,7 @@ contract BoostPool {
     uint256 public maxStake;
     uint256 public totalAmountStaked;
     uint256 public currentStep;
-    uint256 public currentReward;
+    
     uint256[] public rewardSteps;
     uint256[] public stakeSteps;
     uint256 public rewardQuote;
@@ -31,7 +31,7 @@ contract BoostPool {
 
     event Deposit(uint256 amount);
     event StakeAdded(address stakeAddress, uint256 stakeAmount, uint256 stakeTime);
-    event Unstaked(address stakeAddress, uint256 lockDays, uint256 stakeAmount,uint256 yieldAmount);
+    event Unstaked(address stakeAddress, uint256 stakeAmount,uint256 yieldAmount);
     event OwnerDeposit(uint256 amount);
     event OwnerWithdraw(uint256 amount);
     
@@ -42,7 +42,6 @@ contract BoostPool {
         uint256 yieldAmount;
         bool isAdded;
         bool staked;
-        //duration;
     }
     
     address[] public staker_addresses;
@@ -65,7 +64,6 @@ contract BoostPool {
         //assert _stakeToken != ZERO_ADDRESS, "BoostPool: Vegatoken is zero address"
         stakeToken = _stakeToken;
         yieldToken = _yieldToken;
-        duration = _duration;
         maxYield = _maxYield;
         maxStake = _maxStake;
         minPerStake = _minPerStake;
@@ -74,23 +72,16 @@ contract BoostPool {
         maxPerStake = _maxPerStake;        
         rewardSteps = _rewardSteps;        
         stakeSteps = _stakeSteps;  
+
         startTime = block.timestamp;
-        endTime = startTime + 30 * (1 days);
+        endTime = startTime + _duration;
 
         totalAmountStaked = 0;
         currentStep = 0;
-        rewardQuote = 1;
-        currentReward = _rewardSteps[0];
+        rewardQuote = 1;        
         yieldTotal = 0;
 
     }    
-
-    function setCurrentReward() public {
-        //TODO loop through stakesteps?
-        if (totalAmountStaked > stakeSteps[currentStep+1]){
-            currentStep++;
-        }
-    }
 
     function stake(uint256 _stakeAmount) public {
 
@@ -108,7 +99,7 @@ contract BoostPool {
 
         // # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
 
-        uint256 _yieldAmount = _stakeAmount * currentReward/rewardQuote;
+        uint256 _yieldAmount = _stakeAmount * rewardSteps[currentStep]/rewardQuote;
 
         require(yieldTotal + _yieldAmount <= maxYield, "BoostPool: rewards exhausted");
         
@@ -127,7 +118,9 @@ contract BoostPool {
 
         totalAmountStaked += _stakeAmount;
 
-        setCurrentReward();
+        if (totalAmountStaked > stakeSteps[currentStep]){
+            currentStep++;
+        }
 
         emit StakeAdded(msg.sender, _stakeAmount, block.timestamp);
 
@@ -139,10 +132,11 @@ contract BoostPool {
         //uint256 b = ERC20(stakeToken).balanceOf(msg.sender);
         require(stakes[msg.sender].staked, "BoostPool: not staked");
 
-        uint256 lockduration = block.timestamp - stakes[msg.sender].stakeTime;
-        uint256 lockdays = lockduration/1 days;
-
-        require(lockdays >= duration, "BoostPool: not locked for duration");
+        //uint256 lockduration = block.timestamp - stakes[msg.sender].stakeTime;
+        //uint256 lockdays = lockduration/1 days;
+        //require(lockdays >= duration, "BoostPool: not locked for duration");
+        
+        require(block.timestamp >= endTime, "BoostPool: not locked for duration");
 
         //transfer stake
         bool transferStakeSuccess = ERC20(stakeToken).transfer(msg.sender, stakes[msg.sender].stakeAmount);
@@ -153,8 +147,8 @@ contract BoostPool {
 
         stakes[msg.sender].staked = false;
 
-        totalAmountStaked -= stakes[msg.sender].stakeAmount;
-        emit Unstaked(msg.sender, lockdays, stakes[msg.sender].stakeAmount, stakes[msg.sender].yieldAmount);
+        //totalAmountStaked -= stakes[msg.sender].stakeAmount;
+        emit Unstaked(msg.sender, stakes[msg.sender].stakeAmount, stakes[msg.sender].yieldAmount);
 
     }
     

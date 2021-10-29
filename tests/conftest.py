@@ -29,7 +29,8 @@ def token2(VegaToken, accounts):
 def boostpool(token, token2, accounts):
     maxy = 10000 * 10 ** 18
     maxStake = 100000 * 10 ** 18
-    dur = 30
+    days = 60*60*24
+    dur = 30 * days
     reward = [5, 2, 0, 0, 0]
     ssteps = [0, 1000, 1000, 1000, 1000]
     maxs = 1000 * 10 ** 18
@@ -57,7 +58,8 @@ def boostpool(token, token2, accounts):
 def boostpool2(token, token2, accounts):
     maxy = 10000 * 10 ** 18
     maxStake = 100000 * 10 ** 18
-    dur = 30
+    days = 60*60*24
+    dur = 30 * days
     reward = [10, 8, 4, 2, 1]
     ssteps = [0, 1000, 2000, 3000, 4000]
     maxs = 1000 * 10 ** 18
