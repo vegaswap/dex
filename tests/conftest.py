@@ -28,7 +28,7 @@ def token2(VegaToken, accounts):
 @pytest.fixture(scope="module")
 def boostpool(token, token2, accounts):
     maxy = 10000 * 10 ** 18
-    maxStake = 100000 * 10 ** 18
+    maxStake = 100000 * 10 ** 18    
     days = 60*60*24
     dur = 30 * days
     reward = [5, 2, 0, 0, 0]
@@ -40,8 +40,7 @@ def boostpool(token, token2, accounts):
         token2.address,
         dur,        
         maxy,
-        maxStake,
-        # 1000 * 10 ** 18,
+        maxStake,        
         18,
         18,
         maxs,

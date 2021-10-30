@@ -22,6 +22,7 @@ contract BoostPool {
     uint256 public maxYield;
     uint256 public maxStake;
     uint256 public totalAmountStaked;
+    uint256 public totalAmountClaimed;
     uint256 public currentStep;
     
     uint256[] public rewardSteps;
@@ -30,7 +31,7 @@ contract BoostPool {
     uint256 public minPerStake;
 
     event Deposit(uint256 amount);
-    event StakeAdded(address stakeAddress, uint256 stakeAmount, uint256 stakeTime);
+    event StakeAdded(address stakeAddress, uint256 stakeAmount, uint256 yieldAmount, uint256 stakeTime);
     event Unstaked(address stakeAddress, uint256 stakeAmount,uint256 yieldAmount);
     event OwnerDeposit(uint256 amount);
     event OwnerWithdraw(uint256 amount);
@@ -77,6 +78,7 @@ contract BoostPool {
         endTime = startTime + _duration;
 
         totalAmountStaked = 0;
+        totalAmountClaimed = 0;
         currentStep = 0;
         rewardQuote = 1;        
         yieldTotal = 0;
@@ -117,12 +119,13 @@ contract BoostPool {
         });    
 
         totalAmountStaked += _stakeAmount;
+        totalAmountClaimed += _yieldAmount;
 
         if (totalAmountStaked > stakeSteps[currentStep]){
             currentStep++;
         }
 
-        emit StakeAdded(msg.sender, _stakeAmount, block.timestamp);
+        emit StakeAdded(msg.sender, _stakeAmount, _yieldAmount, block.timestamp);
 
     }
 
@@ -139,11 +142,9 @@ contract BoostPool {
         require(block.timestamp >= endTime, "BoostPool: not locked for duration");
 
         //transfer stake
-        bool transferStakeSuccess = ERC20(stakeToken).transfer(msg.sender, stakes[msg.sender].stakeAmount);
-        require(transferStakeSuccess, "BoostPool: sending stake failed");
+        require(ERC20(stakeToken).transfer(msg.sender, stakes[msg.sender].stakeAmount), "BoostPool: sending stake failed");
         //transfer yield
-        bool transferYieldSuccess = ERC20(yieldToken).transfer(msg.sender, stakes[msg.sender].yieldAmount);
-        require(transferYieldSuccess, "BoostPool: sending yield failed");
+        require(ERC20(yieldToken).transfer(msg.sender, stakes[msg.sender].yieldAmount), "BoostPool: sending yield failed");
 
         stakes[msg.sender].staked = false;
 
@@ -166,9 +167,9 @@ contract BoostPool {
 
     function withdrawOwner(uint256 amount) public {
         require(msg.sender == owner, "not the owner");
-        uint256 bucketbalance = ERC20(yieldToken).balanceOf(address(this));
-        uint256 unclaimedbalance = bucketbalance - totalAmountStaked;
-        require(amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts");
+        //uint256 bucketbalance = ERC20(yieldToken).balanceOf(address(this));
+        //uint256 unclaimedbalance = bucketbalance - totalAmountClaimed;
+        //require(amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts");
 
         bool transferYieldSuccess = ERC20(yieldToken).transfer(msg.sender, amount);
         require(transferYieldSuccess, "BoostPool: withdrawOwner");
