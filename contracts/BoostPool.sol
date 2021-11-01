@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.5;
 
 //Boost Pool
 //a pool for fixed duration staking rewards
@@ -58,6 +58,7 @@ contract BoostPool {
         uint256 _yieldDecimals,
         uint256 _maxPerStake,
         uint256 _minPerStake,
+        //uint256 _rewardQuote
         uint256[] memory _rewardSteps,
         uint256[] memory _stakeSteps
     ){
@@ -80,7 +81,9 @@ contract BoostPool {
         totalAmountStaked = 0;
         totalAmountClaimed = 0;
         currentStep = 0;
-        rewardQuote = 1;        
+        //stake too deep
+        //rewardQuote = _rewardQuote;        
+        rewardQuote = 1;
         yieldTotal = 0;
 
     }    
@@ -93,15 +96,13 @@ contract BoostPool {
         require(_stakeAmount >= minPerStake, "BoostPool: not enough");
         require(totalAmountStaked + _stakeAmount <= maxStake,  "BoostPool: maximum staked");
         require(!stakes[msg.sender].isAdded, "BoostPool: can only stake once");
-
-        uint256 bal = ERC20(stakeToken).balanceOf(msg.sender);
-
-        uint256 unclaimed = bal - totalAmountStaked;
-        require(unclaimed >= _stakeAmount, "BoostPool: need the tokens to stake");
-
-        // # assert self.rewardQuote > 0, "BoostPool: reward quote can not be 0"
-
+        
         uint256 _yieldAmount = _stakeAmount * rewardSteps[currentStep]/rewardQuote;
+
+        //check available yield tokens         
+        //uint256 bal = ERC20(yieldToken).balanceOf(address(this));
+        //uint256 unclaimed = bal - totalAmountClaimed;
+        //require(unclaimed >= _yieldAmount, "BoostPool: need the tokens to stake");
 
         require(yieldTotal + _yieldAmount <= maxYield, "BoostPool: rewards exhausted");
         

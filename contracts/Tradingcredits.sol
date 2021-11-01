@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 import "./Ownable.sol";
 
-contract Credits is Ownable {
+contract Tradingcredits is Ownable {
     uint256 private _issuedSupply;
     uint8 private _decimals;
     string private _symbol;

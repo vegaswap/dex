@@ -2,7 +2,7 @@
 pragma solidity ^0.8.5;
 
 import "./Ownable.sol";
-import "./Credits.sol";
+import "./Tradingcredits.sol";
 
 import "./uniswap/IUniswapV2Router02.sol";
 import "./uniswap/IUniswapV2Factory.sol";
@@ -12,7 +12,7 @@ import "./Registry.sol";
 /// Vega Broker routes to pools of liquidity
 /// issues credits based on USD volume
 contract Broker is Ownable {
-    Credits private credits;
+    Tradingcredits private tradingcredits;
 
     bool public IsInitialized;
 
@@ -24,26 +24,50 @@ contract Broker is Ownable {
 
     event StringFailure(string stringFailure);
 
+    struct Credit {
+        address creditAddress;
+        uint256 creditAmount;
+        bool isAdded;
+    }
+
     //IUniswapV2Factory public pancake_factory = IUniswapV2Factory(Registry.PANCAKE_FACTORY);
 
     IUniswapV2Router02 public pancake_router =
         IUniswapV2Router02(Registry.PANCAKE_ROUTER_ADDRESS);
 
+    mapping(address => Credit) public credits;    
+
     constructor() {
         IsInitialized = true;
         emit Initialized();
 
-        credits = new Credits("VCS");
+        tradingcredits = new Tradingcredits("VCS");
     }
 
     //approve?
     //transferFrom
+    
+    function depositBUSD(uint256 amount) public {
 
-    function depositBUSD() {
+        //require (ERC20(Registry.BUSD).allowance(msg.sender, address(this)) >= amount,"BoostPool: not enough allowance");
+        //require (ERC20(Registry.BUSD).balanceOf(msg.sender) >= amount,"BoostPool: not enough balance");
+        require(IERC20(Registry.BUSD).transferFrom(msg.sender, address(this), amount), "Broker: deposit margin failed");
+
+        credits[msg.sender] = Credit(
+        {
+            creditAddress: msg.sender,
+            creditAmount: amount,            
+            isAdded: true
+        });  
 
     }
-    
-    function withdrawBUSD() {
+
+    function withdrawBUSD(uint256 amount) public {
+
+        //TODO check credit of the msg.sender
+        require(credits[msg.sender].creditAmount >= amount, "Broker: not enough credit");
+
+        require(IERC20(Registry.BUSD).transfer(msg.sender, amount), "Broker: withdraw margin failed");
 
     }
 
@@ -53,7 +77,7 @@ contract Broker is Ownable {
         view
         returns (uint256)
     {
-        uint256 price = getBUSDPrice(token, qty) / qty;
+        uint256 price = getPriceBUSD(token, qty) / qty;
         uint256 amount_BUSD = qty * price;
         return amount_BUSD;
     }
@@ -64,13 +88,13 @@ contract Broker is Ownable {
         //20 USD worth
         uint256 qty_in = 20 * 10**18;
 
-        IERC20(Registry.BUSD).approve(PANCAKE_ROUTER_ADDRESS, qty_in);
+        IERC20(Registry.BUSD).approve(Registry.PANCAKE_ROUTER_ADDRESS, qty_in);
 
         //uint allowed = IERC20(token1).allowance(address(this), address(sushiRouter));
 
         uint256 allowed = IERC20(Registry.BUSD).allowance(
             msg.sender,
-            Registry.PANCAKE_ROUTER
+            Registry.PANCAKE_ROUTER_ADDRESS
         );
         require(allowed >= qty_in, "not enough allowance to trade");
 
@@ -117,7 +141,7 @@ contract Broker is Ownable {
         uint256 price = 13;
         uint256 issue_amount = qty_in * price;
 
-        credits.issue(msg.sender, issue_amount);
+        tradingcredits.issue(msg.sender, issue_amount);
 
         // try credits.issue(msg.sender, issue_amount) {
         //     emit Trade(msg.sender, issue_amount);
@@ -133,7 +157,7 @@ contract Broker is Ownable {
         //TODO X price
         uint256 allowed = IERC20(Registry.BUSD).allowance(
             msg.sender,
-            Registry.PANCAKE_ROUTER
+            Registry.PANCAKE_ROUTER_ADDRESS
         );
         require(allowed >= qty, "not enough allowance to trade");
         //uint256 allowed = IERC20(BUSD).allowance(msg.sender, address(this));
@@ -143,7 +167,7 @@ contract Broker is Ownable {
         // uint256 qty = 5 * fdec;
 
         //assume linear, i.e. no price impact
-        uint256 price = getBUSDPrice(token, qty) / qty;
+        uint256 price = getPriceBUSD(token, qty) / qty;
 
         uint256 bal = IERC20(Registry.BUSD).balanceOf(msg.sender);
         uint256 amount_BUSD = qty * price;
@@ -170,7 +194,7 @@ contract Broker is Ownable {
         //TODO calculate USD amount
         uint256 issue_amount = qty;
 
-        credits.issue(msg.sender, issue_amount);
+        tradingcredits.issue(msg.sender, issue_amount);
 
         // try credits.issue(msg.sender, issue_amount) {
         //     emit Trade(msg.sender, issue_amount);
@@ -188,19 +212,19 @@ contract Broker is Ownable {
     }
 
     function issueCredit(address account, uint256 amount) public onlyOwner {
-        credits.issue(account, amount);
+        tradingcredits.issue(account, amount);
     }
 
     function creditAddress() public view returns (address) {
-        return address(credits);
+        return address(tradingcredits);
     }
 
     function balanceOfCredits() public view returns (uint256) {
-        return credits.balanceOf(msg.sender);
+        return tradingcredits.balanceOf(msg.sender);
     }
 
     function totalCredits() public view returns (uint256) {
-        return credits.totalSupply();
+        return tradingcredits.totalSupply();
     }
 
     function balanceOfToken(address token) public view returns (uint256) {
@@ -210,7 +234,7 @@ contract Broker is Ownable {
     function allowedRouter(address token) public view returns (uint256) {
         uint256 allowed = IERC20(token).allowance(
             msg.sender,
-            Registry.PANCAKE_ROUTER
+            Registry.PANCAKE_ROUTER_ADDRESS
         );
         return allowed;
     }
@@ -258,7 +282,39 @@ contract Broker is Ownable {
     // }
 }
 
+// contract Arbitrage {
+    
+//     IUniswapV2Router02 public sushiRouter = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
+    
+//     event test (uint timestamp, uint amountIn, uint amountOut, address[] path, uint allowance, address sender);
+    
+//     function swapper(address token1, address token2) public  {
+//         address[] memory path = new address[](2);
+//         path[0] = token1;
+//         path[1] = token2;
+//         uint amountOut = 1 ether;
+//         uint amountIn = sushiRouter.getAmountsIn(
+//             amountOut,
+//             path
+//         )[0];
+        
+        
+        
+//         IERC20(token1).approve(address(sushiRouter), amountIn);
+        
+//         uint allowed = IERC20(token1).allowance(msg.sender, address(sushiRouter));
+        
+//         emit test(now+90, amountIn, amountOut, path, allowed, msg.sender);
 
+//         sushiRouter.swapExactTokensForTokens(
+//             amountIn, 
+//             amountOut,
+//             path, 
+//             msg.sender, 
+//             now + 60
+//         );
+//     }
+// }
 
 // address[] memory path = new address[](2);
 // path[0] = tokenIn;
@@ -295,3 +351,5 @@ contract Broker is Ownable {
 
 //TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
 //TransferHelper.safeApprove(tokenIn, address(router), amountIn);
+
+
