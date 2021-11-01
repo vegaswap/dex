@@ -27,7 +27,7 @@ contract Broker is Ownable {
     //IUniswapV2Factory public pancake_factory = IUniswapV2Factory(Registry.PANCAKE_FACTORY);
 
     IUniswapV2Router02 public pancake_router =
-        IUniswapV2Router02(Registry.PANCAKE_ROUTER);
+        IUniswapV2Router02(Registry.PANCAKE_ROUTER_ADDRESS);
 
     constructor() {
         IsInitialized = true;
@@ -38,6 +38,15 @@ contract Broker is Ownable {
 
     //approve?
     //transferFrom
+
+    function depositBUSD() {
+
+    }
+    
+    function withdrawBUSD() {
+
+    }
+
 
     function balanceRequired(uint256 qty, address token)
         public
@@ -51,49 +60,19 @@ contract Broker is Ownable {
 
     //TMP
     function tradeCake() public {
-        // address[] memory path = new address[](2);
-        // path[0] = tokenIn;
-        // path[1] = tokenOut;
-
-        // router.swapExactTokensForTokens(
-        //     amountIn,
-        //     0, // amountOutMin: we can skip computing this number because the math is tested
-        //     path,
-        //     to,
-        //     deadline
-        // );
-
-        //TODO check balance
-        //
-        //caller_balance = token.balanceOf(msg.sender);
-        //require(caller_balance>trademount)
 
         //20 USD worth
         uint256 qty_in = 20 * 10**18;
+
+        IERC20(Registry.BUSD).approve(PANCAKE_ROUTER_ADDRESS, qty_in);
+
+        //uint allowed = IERC20(token1).allowance(address(this), address(sushiRouter));
+
         uint256 allowed = IERC20(Registry.BUSD).allowance(
             msg.sender,
             Registry.PANCAKE_ROUTER
         );
         require(allowed >= qty_in, "not enough allowance to trade");
-
-        //function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {
-        //address pairAddress = IUniswapV2Factory(factory).getPair(token0, token1);
-        // require(pairAddress != 0, 'pool is not existed');
-        // IUniswapV2Pair(pairAddress).swap(amount0, amount1, address(this), bytes('not empty'));
-
-        //amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
-        //require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
-
-        //uint256 price = 12;
-
-        // uint amountOut = 1 ether;
-        // uint amountIn = uniRouter.getAmountsIn(
-        //     amountOut,
-        //     path
-        // )[0];
-
-        //TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
-        //TransferHelper.safeApprove(tokenIn, address(router), amountIn);
 
         uint256 amountOutmin = 0; //(qty*price)/2;
         address[] memory route = new address[](2);
@@ -126,7 +105,7 @@ contract Broker is Ownable {
             )
         returns (uint256[] memory _amounts) {
             amounts = _amounts;
-            //require(1 == 2, "Will revert");
+            
         } catch Error(string memory _err) {
             emit StringFailure(_err);
         }
@@ -236,30 +215,41 @@ contract Broker is Ownable {
         return allowed;
     }
 
-    function getPrice(
+    function getPriceA(
         address A,
         address B,
         uint256 amount
     ) public view returns (uint256) {
         address[] memory path = new address[](2);
-        //path[0] = WBNB;
-        //path[1] = CAKE;
         path[0] = A;
         path[1] = B;
+        return getPrice(path, amount);        
+    }
+
+    function getPrice(address[] memory path, uint256 amount) public view returns (uint256) {      
         uint256 p = pancake_router.getAmountsIn(amount, path)[0];
         return p;
     }
 
-    function getBUSDPrice(address A, uint256 amount)
+    function getPriceBNB(
+        address A,        
+        uint256 amount
+    ) public view returns (uint256) {
+        address[] memory path = new address[](2);
+        path[0] = Registry.WBNB;        
+        path[1] = A;
+        return getPrice(path, amount);        
+    }
+
+    function getPriceBUSD(address A, uint256 amount)
         public
         view
         returns (uint256)
     {
         address[] memory path = new address[](2);
-        path[0] = Registry.BUSD;
+        path[0] = Registry.BUSD;        
         path[1] = A;
-        uint256 p = pancake_router.getAmountsIn(amount, path)[0];
-        return p;
+        return getPrice(path, amount);
     }
 
     // function setPair() public {
@@ -267,3 +257,41 @@ contract Broker is Ownable {
     //     select_pair[1] = CAKE;
     // }
 }
+
+
+
+// address[] memory path = new address[](2);
+// path[0] = tokenIn;
+// path[1] = tokenOut;
+
+// router.swapExactTokensForTokens(
+//     amountIn,
+//     0, // amountOutMin: we can skip computing this number because the math is tested
+//     path,
+//     to,
+//     deadline
+// );
+
+//TODO check balance
+//
+//caller_balance = token.balanceOf(msg.sender);
+//require(caller_balance>trademount)
+
+//function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {
+//address pairAddress = IUniswapV2Factory(factory).getPair(token0, token1);
+// require(pairAddress != 0, 'pool is not existed');
+// IUniswapV2Pair(pairAddress).swap(amount0, amount1, address(this), bytes('not empty'));
+
+//amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
+//require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+
+//uint256 price = 12;
+
+// uint amountOut = 1 ether;
+// uint amountIn = uniRouter.getAmountsIn(
+//     amountOut,
+//     path
+// )[0];
+
+//TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
+//TransferHelper.safeApprove(tokenIn, address(router), amountIn);

@@ -159,8 +159,7 @@ contract BoostPool {
         require (ERC20(yieldToken).allowance(msg.sender, address(this)) >= amount,"BoostPool: not enough allowance");
         require (ERC20(yieldToken).balanceOf(msg.sender) >= amount,"BoostPool: not enough balance");
 
-        bool transferYieldSuccess = ERC20(yieldToken).transferFrom(msg.sender, address(this), amount);
-        require(transferYieldSuccess, "BoostPool: sending yield failed");
+        require(ERC20(yieldToken).transferFrom(msg.sender, address(this), amount), "BoostPool: sending yield failed");
 
         emit OwnerDeposit(amount);
     }
@@ -171,8 +170,7 @@ contract BoostPool {
         //uint256 unclaimedbalance = bucketbalance - totalAmountClaimed;
         //require(amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts");
 
-        bool transferYieldSuccess = ERC20(yieldToken).transfer(msg.sender, amount);
-        require(transferYieldSuccess, "BoostPool: withdrawOwner");
+        require(ERC20(yieldToken).transfer(msg.sender, amount),"BoostPool: withdrawOwner");
 
         emit OwnerWithdraw(amount);
     }
