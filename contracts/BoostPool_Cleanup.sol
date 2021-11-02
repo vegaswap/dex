@@ -244,6 +244,8 @@ contract BoostPool {
         //uint256 b = ERC20(stakeToken).balanceOf(msg.sender);
         require(stakes[msg.sender].staked, "BoostPool: not staked");
 
+
+        // unstake only at duration time collapsed
         //uint256 lockduration = block.timestamp - stakes[msg.sender].stakeTime;
         //uint256 lockdays = lockduration/1 days;
         //require(lockdays >= duration, "BoostPool: not locked for duration");
@@ -270,6 +272,7 @@ contract BoostPool {
             "BoostPool: sending yield failed"
         );
 
+        // Nice to have: extra variable, isStakeEnded true;
         stakes[msg.sender].staked = false;
 
         //totalAmountStaked -= stakes[msg.sender].stakeAmount;
