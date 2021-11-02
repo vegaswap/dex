@@ -68,7 +68,7 @@ contract BoostPool {
         uint256[] memory _stakeSteps, // Not used
         uint256 _rewardQuote
     ) {
-        owner = msg.sender;
+        owner = msg.sender; // set owner
         //assert _stakeToken != ZERO_ADDRESS, "BoostPool: is zero address"
         stakeToken = _stakeToken;
         yieldToken = _yieldToken;
@@ -160,6 +160,7 @@ contract BoostPool {
         //     staked: true
         // });
 
+        // TODO: Implement staking logic
         require(_stakeAmount > 0, "??");
         require(totalAmountStaked >= 0, "??");
         //totalAmountStaked += _stakeAmount;
@@ -220,7 +221,7 @@ contract BoostPool {
         });
 
         totalAmountStaked += _stakeAmount;
-        totalAmountClaimed += _yieldAmount;
+        totalAmountClaimed += _yieldAmount; // user should not claim at staking time
 
         if (totalAmountStaked > stakeSteps[currentStep]) {
             currentStep++;
@@ -233,6 +234,10 @@ contract BoostPool {
             block.timestamp
         );
     }
+
+    // TODO: Missing function
+    // function withdrawRewards() {}
+    //
 
     function unstake() public {
         require(stakes[msg.sender].isAdded, "BoostPool: not a stakeholder");
@@ -296,7 +301,7 @@ contract BoostPool {
     }
 
     function withdrawOwner(uint256 amount) public {
-        require(msg.sender == owner, "not the owner");
+        require(msg.sender == owner, "BoostPool: not the owner");
         //uint256 bucketbalance = ERC20(yieldToken).balanceOf(address(this));
         //uint256 unclaimedbalance = bucketbalance - totalAmountClaimed;
         //require(amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts");
