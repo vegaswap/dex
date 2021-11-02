@@ -43,7 +43,7 @@ contract BoostPool {
         uint256 stakeTime;
     }
     
-    address[] public staker_addresses;
+    address[] public stakerAddresses;
     mapping(address => Stake) public stakes;
 
     constructor(
@@ -52,12 +52,12 @@ contract BoostPool {
         uint256 _duration,
         uint256 _maxYield,
         uint256 _maxStake,
-        uint256 _stakeDecimals,
-        uint256 _yieldDecimals,
+        uint256 _stakeDecimals, // should get from the token ERC20(tokenAddress) TODO: Remove
+        uint256 _yieldDecimals, // should get from the token ERC20(tokenAddress) TODO: Remove
         uint256 _maxPerStake,
-        //uint256 _minPerStake,
-        uint256[] memory _rewardSteps,
-        uint256[] memory _stakeSteps,
+        //uint256 _minPerStake, // TODO: Should enable this?, and accept external variable
+        uint256[] memory _rewardSteps, // Not used
+        uint256[] memory _stakeSteps, // Not used
         uint256 _rewardQuote
     ){
         owner = msg.sender;
@@ -79,9 +79,14 @@ contract BoostPool {
         totalAmountClaimed = 0;
         currentStep = 0;        
         rewardQuote = _rewardQuote;        
-        minPerStake = 1 * 10**stakeDecimals;
+        minPerStake = 1 * 10**stakeDecimals; // HARDCODE
 
     }
+
+    // TODO: In future, we check msg.value for staking native token like BNB
+    // function stakeNative() {
+    //
+    // }
 
     function stake(uint256 _stakeAmount) public {
 
@@ -97,7 +102,7 @@ contract BoostPool {
         require(totalAmountClaimed + _yieldAmount <= maxYield, "BoostPool: rewards exhausted");
         
         require(ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount),"BoostPool: transfer failed");
-        staker_addresses.push(msg.sender);
+        stakerAddresses.push(msg.sender);
 
         // stakes[msg.sender] = Stake(
         // {
@@ -165,7 +170,7 @@ contract BoostPool {
         require(totalAmountClaimed + _yieldAmount <= maxYield, "BoostPool: rewards exhausted");
         
         require(ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount),"BoostPool: transfer failed");
-        staker_addresses.push(msg.sender);
+        stakerAddresses.push(msg.sender);
 
         stakes[msg.sender] = Stake(
         {
