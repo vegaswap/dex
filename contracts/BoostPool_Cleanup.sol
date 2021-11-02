@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.5;
 
-//Boost Pool
-//a pool for fixed duration staking rewards
+// This version is mainly for cleanup and will be merged to BoostPool.sol
 
 import "./erc20.sol";
 
