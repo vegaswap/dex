@@ -14,11 +14,13 @@ contract Broker is Ownable {
     IUniswapV2Router02 public pancake_router =
         IUniswapV2Router02(Registry.PANCAKE_ROUTER_ADDRESS);
 
+    uint256 public totalUSDtraded;
+
     constructor() {
     }
     
-    function depositBUSD() public returns (uint256) {
-        uint256 qtyIn = 1 * 10**18;
+    function depositBUSD(uint256 qtyIn) public returns (uint256) {
+         //= 1 * 10**18;
 
         //need approve from msgsender to this contract
         require(IERC20(Registry.BUSD).transferFrom(msg.sender, address(this), qtyIn), "Broker: transfer to broker failed");
@@ -29,15 +31,20 @@ contract Broker is Ownable {
         require(IERC20(Registry.BUSD).transfer(msg.sender, amount), "Broker: withdraw margin failed");
     }
 
-    function allowRouter() public returns (uint256) {
-        uint256 qtyIn = 1 * 10**18;
+    function withdrawToken(uint256 amount) public {
+
+        //require(IERC20(Registry.BUSD).transfer(msg.sender, amount), "Broker: withdraw margin failed");
+    }
+
+    function allowRouter(uint256 qtyIn) public returns (uint256) {
+        //uint256 qtyIn = 1 * 10**18;
 
         IERC20(Registry.BUSD).approve(Registry.PANCAKE_ROUTER_ADDRESS, qtyIn);
     }
 
-    function tradeCake() public {
+    function tradeCake(uint256 qtyIn) public returns (uint256) {
         address token = Registry.CAKE;
-        uint256 qtyIn = 1 * 10**18;
+        //uint256 qtyIn = 1 * 10**18;
         uint256 amountOutmin = 0; //1 * 10**18;
         address[] memory route = new address[](2);
         route[0] = Registry.BUSD;
@@ -50,6 +57,11 @@ contract Broker is Ownable {
             msg.sender,
             deadline
         );
+
+
+        totalUSDtraded += qtyIn;
+
+        return amounts[0];
     }
 
 }

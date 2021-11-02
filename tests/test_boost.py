@@ -19,8 +19,8 @@ def test_basic(accounts, token, token2, boostpool):
     s = boostpool.stakes(accounts[0])
     assert s[0] == accounts[0]
     assert s[1] == 1000 * 10**18
-    assert s[2] > chain.time() - 10000
-    assert s[3] == 5000 * 10**18
+    assert s[2] == 5000 * 10**18
+    assert s[5] > chain.time() - 10000
     # assert s[5] == True
     # assert s[6] == True
 
@@ -43,6 +43,17 @@ def test_unstake(accounts, token, token2, boostpool):
     assert boostpool.totalAmountStaked() == stakeAmount
 
     chain.sleep(60 * 60 * 24 * 31)
+
+    s = boostpool.stakes(stakeAccount)
+
+    assert  s[0] == stakeAccount
+    assert  s[1] == stakeAmount
+    assert  s[2] == stakeAmount * boostpool.rewardSteps(boostpool.currentStep())
+    assert  s[3] == True
+    assert  s[4] == True
+    
+    #True, True)
+    #assert boostpool.stakes(accounts[0])[1] == accounts[0]
  
     #assert token.balanceOf(accounts[0]) == maxs - depositOwner  
     # assert token2.balanceOf(accounts[0]) == maxs - depositOwner
