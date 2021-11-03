@@ -94,69 +94,31 @@ contract BoostPool {
         
         uint256 _yieldAmount = _stakeAmount * rewardSteps[currentStep]/rewardQuote;
 
-        require(totalAmountClaimed + _yieldAmount <= maxYield, "BoostPool: rewards exhausted");
+        //require(totalAmountClaimed + _yieldAmount <= maxYield, "BoostPool: rewards exhausted");
+
+        //check available yield tokens         
+        //uint256 bal = ERC20(yieldToken).balanceOf(address(this));
+        //uint256 unclaimed = bal - totalAmountClaimed;
+        //require(unclaimed >= _yieldAmount, "BoostPool: need the tokens to stake");
         
         require(ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount),"BoostPool: transfer failed");
         staker_addresses.push(msg.sender);
                 
-        Stake memory s = Stake({
+        stakes[msg.sender] = Stake({
             stakeAddress: msg.sender,
             stakeAmount: _stakeAmount,
             yieldAmount: _yieldAmount,
             isAdded: true,
             staked: true,
             stakeTime: block.timestamp
-        });        
-        stakes[msg.sender] = s;        
+        });                
 
         // require(_stakeAmount>0, "??");
         // require(totalAmountStaked>=0, "??");
         totalAmountStaked += _stakeAmount;
         totalAmountClaimed += _yieldAmount;
 
-        if (totalAmountStaked > stakeSteps[currentStep]){
-            currentStep++;
-        }
-
-        emit StakeAdded(msg.sender, _stakeAmount, _yieldAmount, block.timestamp);
-
-    }
-
-    function stake1(uint256 _stakeAmount) public {
-
-        require(block.timestamp < endTime, "BoostPool: ended");
-        require(block.timestamp >= startTime, "BoostPool: not started");
-        require(_stakeAmount <= maxPerStake, "BoostPool: more than maximum stake");
-        require(_stakeAmount >= minPerStake, "BoostPool: not enough");
-        require(totalAmountStaked + _stakeAmount <= maxStake,  "BoostPool: maximum staked");
-        require(!stakes[msg.sender].isAdded, "BoostPool: can only stake once");
-        
-        uint256 _yieldAmount = _stakeAmount * rewardSteps[currentStep]/rewardQuote;
-
-        //check available yield tokens         
-        //uint256 bal = ERC20(yieldToken).balanceOf(address(this));
-        //uint256 unclaimed = bal - totalAmountClaimed;
-        //require(unclaimed >= _yieldAmount, "BoostPool: need the tokens to stake");
-
-        require(totalAmountClaimed + _yieldAmount <= maxYield, "BoostPool: rewards exhausted");
-        
-        require(ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount),"BoostPool: transfer failed");
-        staker_addresses.push(msg.sender);
-
-        stakes[msg.sender] = Stake(
-        {
-            stakeAddress: msg.sender,
-            stakeAmount: _stakeAmount,
-            stakeTime: block.timestamp,
-            yieldAmount: _yieldAmount,
-            isAdded: true,
-            staked: true
-        });    
-
-        totalAmountStaked += _stakeAmount;
-        totalAmountClaimed += _yieldAmount;
-
-        if (totalAmountStaked > stakeSteps[currentStep]){
+        if (totalAmountStaked >= stakeSteps[currentStep]){
             currentStep++;
         }
 
