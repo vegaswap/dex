@@ -5,6 +5,9 @@ from brownie import chain
 
 def test_basic(accounts, token, token2, boostpool):
     stakea = 1000 * 10**18
+    token.transfer(accounts[1], 5000 * 10**18, {"from": accounts[0]})
+    token2.transfer(accounts[1], 5000 * 10**18, {"from": accounts[0]})
+
     token.approve(boostpool, stakea, {"from": accounts[0]})
     maxs = 10 ** 9 * 10 ** 18 - 5000 * 10**18
     assert token.balanceOf(accounts[0]) == maxs
@@ -39,6 +42,8 @@ def test_basic(accounts, token, token2, boostpool):
 
 def test_unstake(accounts, token, token2, boostpool):
     depositOwner = 2000 * 10**18
+    token.transfer(accounts[1], 5000 * 10**18, {"from": accounts[0]})
+    token2.transfer(accounts[1], 5000 * 10**18, {"from": accounts[0]})
     token2.approve(boostpool, depositOwner, {"from": accounts[0]})
     boostpool.depositOwner(depositOwner, {"from": accounts[0]})
     maxs = 10 ** 9 * 10 ** 18
