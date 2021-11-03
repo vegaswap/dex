@@ -62,7 +62,7 @@ contract BoostPool {
         uint256 _rewardQuote
     ){
         owner = msg.sender;
-        //assert _stakeToken != ZERO_ADDRESS, "BoostPool: is zero address"
+        //require(_stakeToken != ZERO_ADDRESS, "BoostPool: is zero address"
         stakeToken = _stakeToken;
         yieldToken = _yieldToken;
         maxYield = _maxYield;
@@ -81,7 +81,6 @@ contract BoostPool {
         currentStep = 0;        
         rewardQuote = _rewardQuote;        
         minPerStake = 1 * 10**stakeDecimals;
-
     }
 
     function stake(uint256 _stakeAmount) public {
@@ -99,18 +98,7 @@ contract BoostPool {
         
         require(ERC20(stakeToken).transferFrom(msg.sender, address(this), _stakeAmount),"BoostPool: transfer failed");
         staker_addresses.push(msg.sender);
-
-        // stakes[msg.sender] = Stake(
-        // {
-        //     //stakeAddress: msg.sender,
-        //     stakeAddress: address(this),
-        //     stakeAmount: _stakeAmount,
-        //     stakeTime: block.timestamp,
-        //     yieldAmount: 0,
-        //     isAdded: true,
-        //     staked: true
-        // }); 
-
+                
         Stake memory s = Stake({
             stakeAddress: msg.sender,
             stakeAmount: _stakeAmount,
@@ -118,32 +106,19 @@ contract BoostPool {
             isAdded: true,
             staked: true,
             stakeTime: block.timestamp
-        });
-        //s.stakeAddress = msg.sender; 
-        stakes[msg.sender] = s;
+        });        
+        stakes[msg.sender] = s;        
 
-        // stakes[msg.sender] = Stake(
-        // {
-        //     //stakeAddress: msg.sender,
-        //     stakeAddress: address(this),
-        //     stakeAmount: _stakeAmount,
-        //     stakeTime: block.timestamp,
-        //     yieldAmount: 0,
-        //     isAdded: true,
-        //     staked: true
-        // });    
+        // require(_stakeAmount>0, "??");
+        // require(totalAmountStaked>=0, "??");
+        totalAmountStaked += _stakeAmount;
+        totalAmountClaimed += _yieldAmount;
 
-        require(_stakeAmount>0, "??");
-        require(totalAmountStaked>=0, "??");
-        //totalAmountStaked += _stakeAmount;
-        totalAmountStaked = 1000 * 10**18;
-        //totalAmountClaimed += _yieldAmount;
+        if (totalAmountStaked > stakeSteps[currentStep]){
+            currentStep++;
+        }
 
-        // if (totalAmountStaked > stakeSteps[currentStep]){
-        //     currentStep++;
-        // }
-
-        //emit StakeAdded(msg.sender, _stakeAmount, _yieldAmount, block.timestamp);
+        emit StakeAdded(msg.sender, _stakeAmount, _yieldAmount, block.timestamp);
 
     }
 
@@ -237,6 +212,10 @@ contract BoostPool {
 
     //emergency withdraw of the stake.
     function withdrawOwnerStake(uint256 amount) public {
+
+    }
+
+    function withdrawUnusedRewards() public {
 
     }
 

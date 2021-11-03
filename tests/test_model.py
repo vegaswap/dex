@@ -1,33 +1,56 @@
 # #!/usr/bin/python3
 import brownie
 from brownie import chain
+from brownie import chain, VegaToken, BoostPool
+
+def test_model(accounts, token, token2):
+    
+    hour = 60*60
+    day = 24 * hour
+    _duration = hour * 6
+    f = 10 ** 18
+    _maxYield = 4000 * f
+    _maxTotalStake = 500 * f
+    _stakeDecimals = 18
+    _yieldDecimals = 18
+    _maxPerStake = 1000 * f
+    _minStake = 10 * f
+    _rewardSteps = [15, 11, 8, 6, 4]        
+    _stakeSteps = [100 * f, 200 * f, 300 * f, 400 * f] 
+    rewardQuote = 1
+    pool = BoostPool.deploy(
+        token,
+        token2,
+        _duration,
+        _maxYield,
+        _maxTotalStake,
+        _stakeDecimals,
+        _yieldDecimals,
+        _maxPerStake,
+        # _minStake,
+        _rewardSteps,
+        _stakeSteps,
+        rewardQuote,
+        {"from": accounts[0]},
+    )
+    token2.transfer(pool, 10000 * 10 ** 18, {"from": accounts[0]})
 
 
-# def test_stakereward(accounts, token, boostpool):
-#     boostpool.activateStaking( {"from": accounts[0]})
-#     rewday = 1
-#     # boostpool.setReward(rewday, {"from": accounts[0]})
-#     # boostpool.setRewardQuote(250, {"from": accounts[0]})
+    stakeaccount = accounts[1]
+    ma = accounts[0]
+    token.transfer(stakeaccount, 10000 * 10 ** 18, {"from": ma})
 
-#     token.approve(boostpool, 2000, {"from": accounts[0]})
-#     boostpool.depositOwner(2000, {"from": accounts[0]})
+    stakea = 100 * 10**18
+    token.approve(pool, stakea, {"from": stakeaccount})
 
-#     token.transfer(accounts[1], 1000)
+    maxs = 10 ** 9 * 10 ** 18 - 5000 * 10**18
+    assert token.balanceOf(accounts[0]) == maxs
 
-#     t = chain.time()
-#     stakeAmount = 1000
-#     token.approve(boostpool, stakeAmount, {"from": accounts[1]})
-#     tx = boostpool.stake(1000, 30, {"from": accounts[1]})
+    c = pool.currentStep()
+    assert c == 0
+    r = pool.rewardSteps(c)
 
-#     assert tx.events["StakeAdded"][0]["stakeTime"] == t
+    assert token.balanceOf(accounts[0]) == maxs
+    pool.stake(stakea,  {"from": accounts[0]})
 
-#     s = boostpool.stakes(accounts[1])
-#     assert s[0]== accounts[1]
-#     assert s[1] == 1000
-#     assert s[2] - t < 10
-#     assert s[3] == 30
-#     assert s[4] == True
-
-#     lockdays = 30
-#     chain.sleep(60*60*24*lockdays)
-#     tx = boostpool.unstake({"from": accounts[1]})
+    #token2.transfer(pool, 10000 * 10 ** 18, {"from": accounts[0]})
