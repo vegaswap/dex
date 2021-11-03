@@ -1,11 +1,10 @@
-.lsp/
-scripts/sendfunds.py
 .clj-kondo/
-client/node_modules
-__pycache__
 .history
 .hypothesis/
+.lsp/
+__pycache__
 build/
 reports/
 scripts/
-client/
+scripts/sendfunds.py
+node_modules
