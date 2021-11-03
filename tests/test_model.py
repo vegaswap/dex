@@ -66,7 +66,7 @@ def test_model(accounts, token, token2):
 
 
     token.transfer(accounts[2], stakea, {"from": mainaccount})
-    token.transfer(accounts[3], stakea, {"from": mainaccount})
+    
 
     token.approve(pool, stakea, {"from": accounts[2]})
     pool.stake(stakea,  {"from": accounts[2]})
@@ -83,19 +83,32 @@ def test_model(accounts, token, token2):
 
     assert pool.totalAmountClaimed() == (stakea * 15) + (stakea * 11)
 
-    
-    #assert s[12] == token
-
-    #TODO asset reward
-
     c = pool.currentStep()
     assert c == 2
 
-
-    token.approve(pool, stakea, {"from": accounts[3]})
-    pool.stake(stakea,  {"from": accounts[3]})
+    i = 3
+    token.transfer(accounts[i], stakea, {"from": mainaccount})
+    token.approve(pool, stakea, {"from": accounts[i]})
+    pool.stake(stakea,  {"from": accounts[i]})
     c = pool.currentStep()
     assert c == 3
+    assert pool.totalAmountStaked() == stakea*3
+
+    i = 4
+    token.transfer(accounts[i], stakea, {"from": mainaccount})
+    token.approve(pool, stakea, {"from": accounts[i]})
+    pool.stake(stakea,  {"from": accounts[i]})
+    c = pool.currentStep()
+    assert c == 4
+    assert pool.totalAmountStaked() == stakea*4
+
+    i = 5
+    with brownie.reverts():
+        token.transfer(accounts[i], stakea, {"from": mainaccount})
+        token.approve(pool, stakea, {"from": accounts[i]})
+        pool.stake(stakea,  {"from": accounts[i]})
+        c = pool.currentStep()
+        assert c == 5
 
     #assert token.balanceOf(stakeaccount) == transfera - stakea
 

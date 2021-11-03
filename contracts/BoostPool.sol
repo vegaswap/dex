@@ -118,6 +118,8 @@ contract BoostPool {
         totalAmountStaked += _stakeAmount;
         totalAmountClaimed += _yieldAmount;
 
+        require(currentStep < stakeSteps.length, "max stake reached");
+
         if (totalAmountStaked >= stakeSteps[currentStep]){
             currentStep++;
         }
