@@ -93,6 +93,7 @@ def test_model(accounts, token, token2):
     c = pool.currentStep()
     assert c == 3
     assert pool.totalAmountStaked() == stakea*3
+    #assert pool.totalAmountClaimed() == stakea*3
 
     i = 4
     token.transfer(accounts[i], stakea, {"from": mainaccount})
