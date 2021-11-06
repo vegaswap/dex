@@ -163,13 +163,13 @@ contract BoostPool {
         emit OwnerDeposit(amount);
     }
 
-    function withdrawOwner(uint256 amount) public {
+    function withdrawOwnerYield(uint256 amount) public {
         require(msg.sender == owner, "not the owner");
         //uint256 bucketbalance = ERC20(yieldToken).balanceOf(address(this));
         //uint256 unclaimedbalance = bucketbalance - totalAmountClaimed;
         //require(amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts");
 
-        require(ERC20(yieldToken).transfer(msg.sender, amount),"BoostPool: withdrawOwner");
+        require(ERC20(yieldToken).transfer(msg.sender, amount),"BoostPool: withdrawOwner yield");
 
         emit OwnerWithdraw(amount);
     }
@@ -177,10 +177,16 @@ contract BoostPool {
     //emergency withdraw of the stake.
     function withdrawOwnerStake(uint256 amount) public {
 
+        require(msg.sender == owner, "not the owner");
+        //uint256 bucketbalance = ERC20(yieldToken).balanceOf(address(this));
+        //uint256 unclaimedbalance = bucketbalance - totalAmountClaimed;
+        //require(amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts");
+
+        require(ERC20(stakeToken).transfer(msg.sender, amount),"BoostPool: withdrawOwner stake");
+
+        emit OwnerWithdraw(amount);
+
     }
 
-    function withdrawUnusedRewards() public {
-
-    }
 
 }
