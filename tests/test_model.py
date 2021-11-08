@@ -103,6 +103,8 @@ def test_model(accounts, token, token2):
     assert c == 4
     assert pool.totalAmountStaked() == stakea*4
 
+    #TODO check end calcualtions after all is staked
+    
     i = 5
     with brownie.reverts():
         token.transfer(accounts[i], stakea, {"from": mainaccount})

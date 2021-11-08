@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.5;
 
-//Boost Pool
-//a pool for fixed duration staking rewards
+//--- Boost Pool ---
+// a pool for fixed duration staking rewards
+// the number of reward is fixed at deploy
+// stakers can stake until start + duration is reached
+// they can unstake after that
+// the APY will go up if one stakes as the time decreases
 
 import "./erc20.sol";
 
@@ -12,7 +16,9 @@ contract BoostPool {
 
     address public stakeToken;
     address public yieldToken;
+    // start when stake is possible
     uint256 public startTime;
+    // end after which unstake becomes possible
     uint256 public endTime;
     //uint256 public duration; // how long to stake, fixed in time at start of the pool
     uint256 public stakeDecimals;
@@ -77,13 +83,14 @@ contract BoostPool {
         rewardSteps = _rewardSteps;        
         stakeSteps = _stakeSteps;  
 
-        startTime = block.timestamp;
+        //startTime = block.timestamp;
+        startTime = _startTime;
         endTime = startTime + _duration;
+        rewardQuote = _rewardQuote;        
 
         totalAmountStaked = 0;
         totalAmountClaimed = 0;
         currentStep = 0;        
-        rewardQuote = _rewardQuote;        
         minPerStake = 1 * 10**stakeDecimals;
     }
 
