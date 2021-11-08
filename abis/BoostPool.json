@@ -2,6 +2,16 @@
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "_startTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_duration",
+                "type": "uint256"
+            },
+            {
                 "internalType": "address",
                 "name": "_stakeToken",
                 "type": "address"
@@ -10,11 +20,6 @@
                 "internalType": "address",
                 "name": "_yieldToken",
                 "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_duration",
-                "type": "uint256"
             },
             {
                 "internalType": "uint256",
@@ -28,22 +33,7 @@
             },
             {
                 "internalType": "uint256",
-                "name": "_stakeDecimals",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_yieldDecimals",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
                 "name": "_maxPerStake",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_minPerStake",
                 "type": "uint256"
             },
             {
@@ -55,6 +45,11 @@
                 "internalType": "uint256[]",
                 "name": "_stakeSteps",
                 "type": "uint256[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_rewardQuote",
+                "type": "uint256"
             }
         ],
         "stateMutability": "nonpayable",
@@ -112,6 +107,12 @@
                 "indexed": false,
                 "internalType": "uint256",
                 "name": "stakeAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "yieldAmount",
                 "type": "uint256"
             },
             {
@@ -384,11 +385,6 @@
             },
             {
                 "internalType": "uint256",
-                "name": "stakeTime",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
                 "name": "yieldAmount",
                 "type": "uint256"
             },
@@ -401,6 +397,11 @@
                 "internalType": "bool",
                 "name": "staked",
                 "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "stakeTime",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -409,6 +410,19 @@
     {
         "inputs": [],
         "name": "startTime",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalAmountClaimed",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -447,7 +461,20 @@
                 "type": "uint256"
             }
         ],
-        "name": "withdrawOwner",
+        "name": "withdrawOwnerStake",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdrawOwnerYield",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -473,19 +500,6 @@
                 "internalType": "address",
                 "name": "",
                 "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "yieldTotal",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
             }
         ],
         "stateMutability": "view",
