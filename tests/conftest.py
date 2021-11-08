@@ -36,14 +36,14 @@ def boostpool(token, token2, accounts):
     maxs = 1000 * 10 ** 18
     # mins = 100 * 10 ** 18
     _rewardQuote = 1
+    startTime = chain.time()
     pool = BoostPool.deploy(
+        startTime,
+        dur,        
         token.address,
         token2.address,
-        dur,        
         maxy,
         maxStake,        
-        18,
-        18,
         maxs,
         # mins,
         reward,

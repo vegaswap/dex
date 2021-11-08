@@ -48,13 +48,14 @@ contract BoostPool {
     mapping(address => Stake) public stakes;
 
     constructor(
+        uint256 _startTime,
+        uint256 _duration,
         address _stakeToken,
         address _yieldToken,
-        uint256 _duration,
         uint256 _maxYield,
         uint256 _maxStake,
-        uint256 _stakeDecimals,
-        uint256 _yieldDecimals,
+        // uint256 _stakeDecimals,
+        // uint256 _yieldDecimals,
         uint256 _maxPerStake,
         //uint256 _minPerStake,
         uint256[] memory _rewardSteps,
@@ -67,8 +68,11 @@ contract BoostPool {
         yieldToken = _yieldToken;
         maxYield = _maxYield;
         maxStake = _maxStake;
-        stakeDecimals = _stakeDecimals;
-        yieldDecimals = _yieldDecimals;
+        // stakeDecimals = _stakeDecimals;
+        // yieldDecimals = _yieldDecimals;
+        //assume 18
+        stakeDecimals = 18;
+        yieldDecimals = 18;
         maxPerStake = _maxPerStake;        
         rewardSteps = _rewardSteps;        
         stakeSteps = _stakeSteps;  
@@ -113,8 +117,6 @@ contract BoostPool {
             stakeTime: block.timestamp
         });                
 
-        // require(_stakeAmount>0, "??");
-        // require(totalAmountStaked>=0, "??");
         totalAmountStaked += _stakeAmount;
         totalAmountClaimed += _yieldAmount;
 
@@ -176,8 +178,8 @@ contract BoostPool {
 
     //emergency withdraw of the stake.
     function withdrawOwnerStake(uint256 amount) public {
-
         require(msg.sender == owner, "not the owner");
+
         //uint256 bucketbalance = ERC20(yieldToken).balanceOf(address(this));
         //uint256 unclaimedbalance = bucketbalance - totalAmountClaimed;
         //require(amount <= unclaimedbalance, "BoostPool: can't withdraw staked amounts");

@@ -20,15 +20,15 @@ def test_model(accounts, token, token2):
     _minStake = 10 * f
     _rewardSteps = [15, 11, 8, 6, 4]        
     _stakeSteps = [100 * f, 200 * f, 300 * f, 400 * f] 
+    startTime = chain.time()
     rewardQuote = 1
     pool = BoostPool.deploy(
+        startTime,
+        _duration,
         token,
         token2,
-        _duration,
         _maxYield,
         _maxTotalStake,
-        _stakeDecimals,
-        _yieldDecimals,
         _maxPerStake,
         # _minStake,
         _rewardSteps,
